@@ -33,21 +33,12 @@ public class AuthenticatorController{
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Validated AuthenticationDTO data){
-        logger.info("Authentication request received for user: {}", data.login());
-
         var userNamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-        logger.info("Authentication token created: {}", userNamePassword);
-
         try {
             var auth = this.authenticationManager.authenticate(userNamePassword);
-            logger.info("Authentication successful for user: {}", auth.getName());
-
             var token = tokenService.generateToken((User) Objects.requireNonNull(auth.getPrincipal()));
-            logger.info("Token generated for user: {}", auth.getName());
-
             return ResponseEntity.ok(new LoginResponseDTO(token));
         } catch (Exception e) {
-            logger.error("Authentication failed for user: {}", data.login(), e);
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
