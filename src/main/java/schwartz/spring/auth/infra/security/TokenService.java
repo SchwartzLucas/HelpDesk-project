@@ -20,7 +20,7 @@ public class TokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
-                    .withIssuer("auth-hekp-desk")
+                    .withIssuer("auth-help-desk")
                     .withSubject(user.getLogin())
                     .withExpiresAt(generateExpirationData())
                     .sign(algorithm);

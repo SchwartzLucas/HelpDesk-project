@@ -1,10 +1,8 @@
 package schwartz.spring.auth.domain.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,17 +16,17 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     private String login;
     private String password;
     @Enumerated(EnumType.STRING)
     private UserRole role;
-    private Boolean isActive;
     private Integer team_id;
+    @Column(name = "is_active")
+    private Byte isActive = 1;
 
     public User(String login, String password, UserRole role) {
         this.login = login;
@@ -42,7 +40,7 @@ public class User implements UserDetails {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
                 new SimpleGrantedAuthority("ROLE_USER"));
         } else {
-            return  List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
     }
 
@@ -68,6 +66,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isActive;
+        Byte one = 1;
+        return one.equals(this.isActive);
     }
 }

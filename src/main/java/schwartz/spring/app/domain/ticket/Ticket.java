@@ -17,7 +17,7 @@ import java.time.Instant;
 @Setter
 public class Ticket {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
     @Column(name = "title", nullable = false, length = 250)
@@ -34,9 +34,9 @@ public class Ticket {
     @Column(name = "category", length = 100)
     private String category;
     @Column(name = "client_id", nullable = false, length = 36)
-    private String clientId;
+    private Long clientId;
     @Column(name = "team_id", nullable = false, length = 36)
-    private String teamId;
+    private Long teamId;
     @Column(name = "responsable_id", length = 36)
     private String responsableId;
     @Column(name = "sla_expiration", nullable = false)

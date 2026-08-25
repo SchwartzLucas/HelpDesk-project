@@ -22,7 +22,7 @@ public class ClientService {
         if(Utils.isEmpty(client.getEmail())){
             throw new IllegalArgumentException("Client e-mail cannot be null or empty");
         }
-        if(!Utils.validarEMAIL(client.getEmail())){
+        if(!Utils.isValidEMAIL(client.getEmail())){
             throw new IllegalArgumentException("Client e-mail informed is invalid");
         }
 
@@ -47,14 +47,20 @@ public class ClientService {
         if(Utils.isEmpty(id)){
             throw new IllegalArgumentException("id cannot be null");
         }
+        if(!Utils.isOnlyDigits(id)){
+            throw new IllegalArgumentException("Only numbers are accepted");
+        }
         return clientRepository.findAllById(id);
     }
 
-    public List<Client> listAllByName(String name){
-        if(Utils.isEmpty(name)){
-            throw new IllegalArgumentException("id cannot be null");
+    public List<Client> listAllBy(String info){
+        if(Utils.isEmpty(info)){
+            throw new IllegalArgumentException("Param cannot be null");
         }
-        return clientRepository.findAllByName(name);
+        if(Utils.isOnlyDigits(info)){
+            return this.listAllById(info);
+        }
+        return clientRepository.findAllByName(info);
     }
 
 }

@@ -9,8 +9,9 @@ import java.util.regex.Pattern;
 
 public class Utils {
 
-    private static final Pattern patterValidEmail = Pattern.compile("^/[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-z]{2,}$");
+    private static final Pattern patterValidEmail = Pattern.compile("^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     private static final Pattern patterValidCPF = Pattern.compile("");
+
     public static boolean isEmpty(final Object object) {
         return switch (object) {
             case null -> true;
@@ -31,13 +32,21 @@ public class Utils {
         };
     }
 
-    public static boolean validarEMAIL(String email) {
+    public static boolean isValidEMAIL(String email) {
         return patterValidEmail.matcher(email).matches();
     }
 
     public static boolean validarCPF(String cpf) {
         // TODO Valicação de CPF com regex
         return false;
+    }
+
+    public static boolean isOnlyDigits(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+        // aceita apenas 0-9, sem sinal, sem espaço
+        return s.matches("[0-9]+");
     }
 }
 

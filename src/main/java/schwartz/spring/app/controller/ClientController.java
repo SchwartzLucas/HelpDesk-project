@@ -2,9 +2,11 @@ package schwartz.spring.app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.client.Client;
+import schwartz.spring.app.domain.client.ClientCreateDTO;
 import schwartz.spring.app.repository.ClientRepository;
 import schwartz.spring.app.services.ClientService;
 
@@ -31,7 +33,7 @@ public class ClientController {
             if(Utils.isEmpty(client)){
                 return ResponseEntity.badRequest().build();
             }
-            clients = clientService.listAllByName(client);
+            clients = clientService.listAllBy(client); // podendo ser o nome ou o ID
             if(Utils.isEmpty(clients)){
                 return ResponseEntity.notFound().build();
             }
@@ -39,6 +41,27 @@ public class ClientController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return null;
+        return ResponseEntity.internalServerError().build();
+    }
+
+    @PostMapping("/new")
+    public ResponseEntity createClient(@RequestBody @Validated ClientCreateDTO clientCreateDTO){
+        try {
+            var requestBody = new Client(clientCreateDTO.name(), clientCreateDTO.email());
+            clientService.saveClient(requestBody);
+            return ResponseEntity.ok(clientCreateDTO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping("/{client}")
+    public ResponseEntity deleteClient(String id){
+        try {
+            clientService.deleteClientById(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
