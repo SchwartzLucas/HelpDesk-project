@@ -1,66 +1,49 @@
 package schwartz.spring.app.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import schwartz.spring.Exceptions.ClientNotFoundException;
-import schwartz.spring.Utils.Utils;
+import schwartz.spring.Exceptions.ClientAlreadyExistsException;
 import schwartz.spring.app.domain.client.Client;
+import schwartz.spring.app.domain.client.ClientCreateRequest;
+import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.ClientRepository;
-
-import java.util.List;
 
 @Service
 public class ClientService {
 
-    @Autowired
-    ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
+    private final PublicIdGenerator publicIdGenerator;
 
-    public Client saveClient(Client client){
-        if(Utils.isEmpty(client.getName())) {
-        throw new IllegalArgumentException("Client name cannot be null or empty");
-        }
-        if(Utils.isEmpty(client.getEmail())){
-            throw new IllegalArgumentException("Client e-mail cannot be null or empty");
-        }
-        if(!Utils.isValidEMAIL(client.getEmail())){
-            throw new IllegalArgumentException("Client e-mail informed is invalid");
-        }
-
-        return clientRepository.save(client);
+    public ClientService(
+            ClientRepository clientRepository,
+            PublicIdGenerator publicIdGenerator
+    ) {
+        this.clientRepository = clientRepository;
+        this.publicIdGenerator = publicIdGenerator;
     }
 
-    public void deleteClientById(String id){
-        if(Utils.isEmpty(id)){
-            throw new IllegalArgumentException("id cannot be null or empty");
-        }
-        if(Utils.isEmpty(clientRepository.findById(id))){
-            throw new ClientNotFoundException("Client not found");
-        }
-        clientRepository.deleteById(id);
-    }
+    @Transactional
+    public Client create(ClientCreateRequest request) {
+        String name = request.name();
+        String email = request.email().trim().toLowerCase();
 
-    public List<Client> listAll(){
-        return clientRepository.findAll();
-    }
+        if (clientRepository.existsByEmailIgnoreCase(email)) {
+            throw new ClientAlreadyExistsException(email);
+        }
 
-    public List<Client> listAllById(String id){
-        if(Utils.isEmpty(id)){
-            throw new IllegalArgumentException("id cannot be null");
-        }
-        if(!Utils.isOnlyDigits(id)){
-            throw new IllegalArgumentException("Only numbers are accepted");
-        }
-        return clientRepository.findAllById(id);
-    }
+        Client client = new Client();
+        client.setPublicId(publicIdGenerator.generate());
+        client.setName(name);
+        client.setEmail(email);
 
-    public List<Client> listAllBy(String info){
-        if(Utils.isEmpty(info)){
-            throw new IllegalArgumentException("Param cannot be null");
-        }
-        if(Utils.isOnlyDigits(info)){
-            return this.listAllById(info);
-        }
-        return clientRepository.findAllByName(info);
-    }
+        clientRepository.saveAndFlush(client);
 
+        client.setPublicCode(String.format(
+                "CLI-%08d", client.getId()
+        ));
+
+        clientRepository.save(client);
+
+        return client;
+    }
 }

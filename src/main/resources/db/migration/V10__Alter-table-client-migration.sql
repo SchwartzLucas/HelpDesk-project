@@ -1,0 +1,2 @@
+ALTER TABLE client
+    MODIFY COLUMN public_code VARCHAR(30) NULL;

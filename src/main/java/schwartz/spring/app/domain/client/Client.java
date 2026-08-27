@@ -1,26 +1,51 @@
 package schwartz.spring.app.domain.client;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
-@Table(name = "client")
-@Entity(name = "client")
-@NoArgsConstructor
-@AllArgsConstructor
+import java.util.UUID;
+
+@Entity
+@Table(
+        name = "client",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_client_public_id",
+                        columnNames = "public_id"
+                ),
+                @UniqueConstraint(
+                        name = "uk_client_public_code",
+                        columnNames = "public_code"
+                )
+        }
+)
 @Getter
 @Setter
 public class Client {
+
     @Id
-    @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name", nullable = false, length = 250)
-    private String name;
-    @Column(name = "email", nullable = false, length = 250)
-    private String email;
 
-    public Client(String name, String email) {
-        this.email = email;
-        this.name = name;
-    }
+    @Column(
+            name = "public_id",
+            nullable = false,
+            unique = true,
+            columnDefinition = "BINARY(16)"
+    )
+    private UUID publicId;
+
+    @Column(
+            name = "public_code",
+            unique = true,
+            length = 30
+    )
+    private String publicCode;
+
+    @Column(nullable = false, length = 250)
+    private String name;
+
+    @Column(nullable = false, length = 250)
+    private String email;
 }

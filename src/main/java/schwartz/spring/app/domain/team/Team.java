@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Table(name = "team")
 @Entity(name = "team")
@@ -23,5 +24,10 @@ public class Team {
     private String description;
     @Column(name = "manager_id", nullable = false, length = 36)
     private String managerId;
+    @ColumnDefault("(uuid_to_bin(uuid()))")
+    @Column(name = "public_id", nullable = false, length = 16)
+    private String publicId;
+    @Column(name = "public_code", nullable = false, length = 30)
+    private String publicCode;
 
 }

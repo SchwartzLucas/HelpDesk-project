@@ -45,6 +45,11 @@ public class Ticket {
     private Instant createdDate;
     @Column(name = "updated_date", nullable = false)
     private Instant updatedDate;
+    @ColumnDefault("(uuid_to_bin(uuid()))")
+    @Column(name = "public_id", nullable = false, length = 16)
+    private String publicId;
+    @Column(name = "public_code", nullable = false, length = 30)
+    private String publicCode;
 
 }
 
