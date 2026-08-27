@@ -1,0 +1,4 @@
+ALTER TABLE team
+    MODIFY COLUMN public_code VARCHAR(30) NULL;
+ALTER TABLE ticket
+    MODIFY COLUMN public_code VARCHAR(30) NULL;

@@ -27,7 +27,7 @@ public class Team {
     @ColumnDefault("(uuid_to_bin(uuid()))")
     @Column(name = "public_id", nullable = false, length = 16)
     private String publicId;
-    @Column(name = "public_code", nullable = false, length = 30)
+    @Column(name = "public_code", length = 30)
     private String publicCode;
 
 }

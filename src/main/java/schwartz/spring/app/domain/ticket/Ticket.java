@@ -1,18 +1,28 @@
 package schwartz.spring.app.domain.ticket;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Table(name = "ticket")
 @Entity(name = "ticket")
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(
+        name = "ticket",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_ticket_public_id",
+                        columnNames = "public_id"
+                ),
+                @UniqueConstraint(
+                        name = "uk_ticket_public_code",
+                        columnNames = "public_code"
+                )
+        }
+)
 @Getter
 @Setter
 public class Ticket {
@@ -26,10 +36,10 @@ public class Ticket {
     private String description;
     @ColumnDefault("0")
     @Column(name = "priority", nullable = false)
-    private Byte priority;
+    private Integer priority;
     @ColumnDefault("0")
     @Column(name = "status", nullable = false)
-    private Byte status;
+    private Integer status;
     @ColumnDefault("'SEM CATEGORIA'")
     @Column(name = "category", length = 100)
     private String category;
@@ -40,15 +50,24 @@ public class Ticket {
     @Column(name = "responsable_id", length = 36)
     private String responsableId;
     @Column(name = "sla_expiration", nullable = false)
-    private Instant slaExpiration;
+    private LocalDateTime slaExpiration;
     @Column(name = "created_date", nullable = false)
-    private Instant createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "updated_date", nullable = false)
-    private Instant updatedDate;
+    private LocalDateTime updatedDate;
     @ColumnDefault("(uuid_to_bin(uuid()))")
-    @Column(name = "public_id", nullable = false, length = 16)
-    private String publicId;
-    @Column(name = "public_code", nullable = false, length = 30)
+    @Column(
+            name = "public_id",
+            nullable = false,
+            unique = true,
+            columnDefinition = "BINARY(16)"
+    )
+    private UUID publicId;
+    @Column(
+            name = "public_code",
+            unique = true,
+            length = 30
+    )
     private String publicCode;
 
 }
