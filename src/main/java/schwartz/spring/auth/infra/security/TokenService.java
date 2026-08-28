@@ -22,6 +22,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("auth-help-desk")
                     .withSubject(user.getLogin())
+                    .withClaim("userId", user.getId()) // ID do usuário como claim customizado
                     .withExpiresAt(generateExpirationData())
                     .sign(algorithm);
         } catch (JWTCreationException e) {
@@ -39,6 +40,25 @@ public class TokenService {
                     .getSubject();
         } catch (JWTVerificationException e) {
             return "";
+        }
+    }
+
+    /**
+     * Extrai o ID do usuário a partir do token JWT.
+     * Retorna null se o token for inválido ou não tiver o claim userId.
+     */
+    public Long getUserIdFromToken(String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            var decoded = JWT.require(algorithm)
+                    .withIssuer("auth-help-desk")
+                    .build()
+                    .verify(token);
+
+            // Retorna o claim "userId" como Long (ajuste para Integer/UUID se necessário)
+            return decoded.getClaim("userId").asLong();
+        } catch (JWTVerificationException e) {
+            return null;
         }
     }
 

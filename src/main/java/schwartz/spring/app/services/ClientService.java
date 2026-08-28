@@ -39,8 +39,9 @@ public class ClientService {
         clientRepository.saveAndFlush(client);
 
         client.setPublicCode(String.format(
-                "CLI-%08d", client.getId()
-        ));
+                        "CLI-%08d", client.getId()
+                )
+        );
 
         clientRepository.save(client);
 
