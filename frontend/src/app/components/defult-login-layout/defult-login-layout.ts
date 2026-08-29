@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   imports: [],
@@ -6,4 +6,8 @@ import { Component } from '@angular/core';
   styleUrl: './defult-login-layout.scss',
   templateUrl: './defult-login-layout.html',
 })
-export class DefultLoginLayout {}
+export class DefultLoginLayout {
+  @Input() title: string = "";
+  @Input() primaryBtnText: string = "";
+  @Input() secondaryBtnText: string = "";
+}

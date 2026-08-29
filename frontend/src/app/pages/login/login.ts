@@ -3,6 +3,7 @@ import {DefultLoginLayout} from '../../components/defult-login-layout/defult-log
 
 
 @Component({
+  standalone: true,
   imports: [
     DefultLoginLayout
   ],
