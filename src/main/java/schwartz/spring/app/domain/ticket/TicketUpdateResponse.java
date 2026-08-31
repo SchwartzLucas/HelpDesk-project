@@ -8,18 +8,18 @@ public record TicketUpdateResponse(
         String description,
         Integer priority,
         Integer status,
-        Long tema_id,
+        Long team_id,
         Long responsable_id,
         LocalDateTime updated_date
 ) {
-    public TicketUpdateResponse from(Ticket ticket){
+    public static TicketUpdateResponse from(Ticket ticket){
         return new TicketUpdateResponse(
                 ticket.getTitle(),
                 ticket.getDescription(),
                 ticket.getPriority(),
                 ticket.getStatus(),
                 ticket.getTeamId(),
-                ticket.getResponsableId(),
+                ticket.getResponsibleId(),
                 ticket.getUpdatedDate()
         );
     }

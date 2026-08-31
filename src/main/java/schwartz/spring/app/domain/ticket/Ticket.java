@@ -48,7 +48,7 @@ public class Ticket {
     @Column(name = "team_id", nullable = false, length = 36)
     private Long teamId;
     @Column(name = "responsable_id")
-    private Long responsableId;
+    private Long responsibleId;
     @Column(name = "sla_expiration", nullable = false)
     private LocalDateTime slaExpiration;
     @Column(name = "created_date", nullable = false)

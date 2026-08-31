@@ -1,6 +1,5 @@
 package schwartz.spring.app.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,10 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import schwartz.spring.app.domain.ticket.Ticket;
-import schwartz.spring.app.domain.ticket.TicketCreateRequest;
-import schwartz.spring.app.domain.ticket.TicketCreateResponse;
-import schwartz.spring.app.domain.ticket.TicketUpdateRequest;
+import schwartz.spring.app.domain.ticket.*;
 import schwartz.spring.app.services.TicketService;
 
 @RestController
@@ -32,7 +28,9 @@ public class TicketController {
 
     @PostMapping("/update")
     public ResponseEntity<TicketUpdateResponse> update(@RequestBody @Validated TicketUpdateRequest request){
-
+        Ticket ticket = ticketService.update(request);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(TicketUpdateResponse.from(ticket));
     }
 
 }
