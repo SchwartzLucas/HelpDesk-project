@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import schwartz.spring.app.domain.ticket.Ticket;
 import schwartz.spring.app.domain.ticket.TicketCreateRequest;
-import schwartz.spring.app.domain.ticket.TicketResponse;
-import schwartz.spring.app.services.ClientService;
+import schwartz.spring.app.domain.ticket.TicketCreateResponse;
+import schwartz.spring.app.domain.ticket.TicketUpdateRequest;
 import schwartz.spring.app.services.TicketService;
 
 @RestController
@@ -24,10 +24,15 @@ public class TicketController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<TicketResponse> create(@RequestBody @Validated TicketCreateRequest request){
+    public ResponseEntity<TicketCreateResponse> create(@RequestBody @Validated TicketCreateRequest request){
         Ticket ticket = ticketService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(TicketResponse.from(ticket));
+                .body(TicketCreateResponse.from(ticket));
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<TicketUpdateResponse> update(@RequestBody @Validated TicketUpdateRequest request){
+
     }
 
 }

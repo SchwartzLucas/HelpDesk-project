@@ -10,8 +10,8 @@ public interface TeamRepository extends JpaRepository<Team, String> {
     @Override
     List<Team> findAll();
     List<Team> findAllByDescription(String description);
-    List<Team> findAllById(Long id);
-    void deleteById(Long id);
+    List<Team> findAllByPublicId(Long publicId);
+    void deleteByPublicId(Long publicId);
 }
 
 
