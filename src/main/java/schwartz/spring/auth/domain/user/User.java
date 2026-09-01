@@ -27,6 +27,8 @@ public class User implements UserDetails {
     private Integer team_id;
     @Column(name = "is_active")
     private Byte isActive = 1;
+    @Column(name = "client_id")
+    private Long client_id;
 
     public User(String login, String password, UserRole role) {
         this.login = login;

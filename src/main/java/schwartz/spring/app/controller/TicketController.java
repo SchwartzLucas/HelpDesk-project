@@ -1,6 +1,5 @@
 package schwartz.spring.app.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,8 +14,12 @@ import schwartz.spring.app.services.TicketService;
 @RequestMapping("/api/ticket")
 public class TicketController {
 
-    @Autowired
-    private TicketService ticketService;
+
+    private final TicketService ticketService;
+
+    public TicketController(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
 
 
     @PostMapping("/create")

@@ -45,7 +45,7 @@ public class Ticket {
     private String category;
     @Column(name = "client_id", nullable = false, length = 36)
     private Long clientId;
-    @Column(name = "team_id", nullable = false, length = 36)
+    @Column(name = "team_id", length = 36)
     private Long teamId;
     @Column(name = "responsable_id")
     private Long responsibleId;

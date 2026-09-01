@@ -8,11 +8,5 @@ import java.util.UUID;
 
 public interface TicketRepository extends JpaRepository<Ticket, String> {
 
-    Ticket findyByPublicId(UUID publicId);
-
-    @Query("""
-            update ticket
-                   set 
-            """)
-    boolean updateWherePublicId(Ticket ticket);
+    Ticket findByPublicId(UUID publicId);
 }
