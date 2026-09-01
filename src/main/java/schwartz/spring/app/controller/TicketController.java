@@ -36,4 +36,10 @@ public class TicketController {
                 .body(TicketUpdateResponse.from(ticket));
     }
 
+    @PostMapping("/list")
+public ResponseEntity<TicketListResponse> list(){
+        Ticket ticket = ticketService.list();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(TicketListResponse.from(ticket));
+    }
 }

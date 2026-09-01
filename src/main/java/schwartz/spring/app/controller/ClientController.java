@@ -17,8 +17,11 @@ import schwartz.spring.app.services.ClientService;
 @RequestMapping("/api/clients")
 public class ClientController {
 
-    @Autowired
-    private ClientService clientService;
+    private final ClientService clientService;
+
+    public ClientController(ClientService clientService) {
+        this.clientService = clientService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<ClientResponse> create(@RequestBody @Validated ClientCreateRequest request) {

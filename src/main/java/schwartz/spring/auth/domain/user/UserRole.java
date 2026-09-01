@@ -1,18 +1,17 @@
 package schwartz.spring.auth.domain.user;
 
+import lombok.Getter;
+
+@Getter
 public enum UserRole {
-    ADMIN("admin"),
+    ADMIN_USER("admin user", 1),
+    SUPPORT_USER("support user", 2),
+    COMMON_USER("common user", 3);
 
-    USER("user");
+    private final String role;
 
-    private String role;
-
-    UserRole(String role){
+    UserRole(String role, int i) {
         this.role = role;
-    }
-
-    public String getRole(){
-        return role;
     }
 
 }

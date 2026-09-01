@@ -148,4 +148,9 @@ public class TicketService {
         // retorna o ticket atualizado (recarrega do banco)
         return ticketRepository.findByPublicId(id);
     }
+
+    public Ticket list() {
+        User user = userService.getAuthenticatedUser();
+        return ticketRepository.listAllByClient_id();
+    }
 }
