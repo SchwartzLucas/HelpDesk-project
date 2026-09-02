@@ -3,12 +3,11 @@ package schwartz.spring.app.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import schwartz.spring.app.domain.ticket.*;
 import schwartz.spring.app.services.TicketService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/ticket")
@@ -36,9 +35,9 @@ public class TicketController {
                 .body(TicketUpdateResponse.from(ticket));
     }
 
-    @PostMapping("/list")
-public ResponseEntity<TicketListResponse> list(){
-        Ticket ticket = ticketService.list();
+    @GetMapping("/list")
+public ResponseEntity<List<TicketListResponse>> list(){
+        List<Ticket> ticket = ticketService.list();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(TicketListResponse.from(ticket));
     }

@@ -10,8 +10,7 @@ public record TicketCreateRequest(
         String title,
 
         @NotBlank(message = "Ticket category cannot be null or empty")
-        @Size(max = 100, message = "Ticket category must have at most 100 characters")
-        String category,
+        Integer category,
 
         @NotBlank(message = "Ticket description cannot be null or empty")
         @Size(max = 5000, message = "Ticket description must have at most 5000 characters")

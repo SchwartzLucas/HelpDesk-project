@@ -40,9 +40,9 @@ public class Ticket {
     @ColumnDefault("0")
     @Column(name = "status", nullable = false)
     private Integer status;
-    @ColumnDefault("'SEM CATEGORIA'")
-    @Column(name = "category", length = 100)
-    private String category;
+    @ColumnDefault("0")
+    @Column(name = "category")
+    private Integer category;
     @Column(name = "client_id", nullable = false, length = 36)
     private Long clientId;
     @Column(name = "team_id", length = 36)

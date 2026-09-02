@@ -51,7 +51,7 @@ public class TicketService {
         Client client = clientRepository.findById(user.getClient_id());
         String title = request.title();
         String description = request.description();
-        String category = request.category();
+        Integer category = request.category();
         Integer priority = request.prority() != null ? request.prority() : 0;
 
 
@@ -149,8 +149,8 @@ public class TicketService {
         return ticketRepository.findByPublicId(id);
     }
 
-    public Ticket list() {
+    public List<Ticket> list() {
         User user = userService.getAuthenticatedUser();
-        return ticketRepository.listAllByClient_id();
+        return ticketRepository.listAllByClient_id(user.getClient_id());
     }
 }

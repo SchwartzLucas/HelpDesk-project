@@ -7,7 +7,7 @@ public record TicketCreateResponse(
         UUID id,
         String title,
         LocalDateTime data_prevista_termino,
-        String categoria
+        Integer categoria
 ) {
 
     public static TicketCreateResponse from(Ticket ticket) {
