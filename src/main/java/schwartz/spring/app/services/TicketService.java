@@ -2,8 +2,6 @@ package schwartz.spring.app.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import schwartz.spring.Exceptions.MissingAttributeException;
@@ -12,6 +10,7 @@ import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.client.Client;
 import schwartz.spring.app.domain.ticket.Ticket;
 import schwartz.spring.app.domain.ticket.TicketCreateRequest;
+import schwartz.spring.app.domain.ticket.TicketListRequest;
 import schwartz.spring.app.domain.ticket.TicketUpdateRequest;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.ClientRepository;
@@ -32,6 +31,7 @@ public class TicketService {
 
     @PersistenceContext
     private EntityManager em;
+
     public TicketService(
             TicketRepository ticketRepository,
             PublicIdGenerator publicIdGenerator,
@@ -53,7 +53,6 @@ public class TicketService {
         String description = request.description();
         Integer category = request.category();
         Integer priority = request.prority() != null ? request.prority() : 0;
-
 
 
         Ticket ticket = new Ticket();
@@ -149,8 +148,11 @@ public class TicketService {
         return ticketRepository.findByPublicId(id);
     }
 
-    public List<Ticket> list() {
+    public List<Ticket> list(TicketListRequest request) {
         User user = userService.getAuthenticatedUser();
+        if (!Utils.isEmpty(request)) {
+            return ticketRepository.listAllWithFilters(user, request);
+        }
         return ticketRepository.listAllByClient_id(user.getClient_id());
     }
 }

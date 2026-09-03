@@ -8,7 +8,7 @@ import schwartz.spring.app.domain.ticket.Ticket;
 import java.util.List;
 import java.util.UUID;
 
-public interface TicketRepository extends JpaRepository<Ticket, String> {
+public interface TicketRepository extends JpaRepository<Ticket, String>, TicketRepositoryCustom {
 
     Ticket findByPublicId(UUID publicId);
 

@@ -22,22 +22,24 @@ public class TicketController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<TicketCreateResponse> create(@RequestBody @Validated TicketCreateRequest request){
+    public ResponseEntity<TicketCreateResponse> create(@RequestBody @Validated TicketCreateRequest request) {
         Ticket ticket = ticketService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(TicketCreateResponse.from(ticket));
     }
 
     @PostMapping("/update")
-    public ResponseEntity<TicketUpdateResponse> update(@RequestBody @Validated TicketUpdateRequest request){
+    public ResponseEntity<TicketUpdateResponse> update(@RequestBody @Validated TicketUpdateRequest request) {
         Ticket ticket = ticketService.update(request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(TicketUpdateResponse.from(ticket));
     }
 
     @GetMapping("/list")
-public ResponseEntity<List<TicketListResponse>> list(){
-        List<Ticket> ticket = ticketService.list();
+    public ResponseEntity<List<TicketListResponse>> list(@RequestBody(required = false) TicketListRequest request) {
+
+        List<Ticket> ticket = ticketService.list(request);
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(TicketListResponse.from(ticket));
     }
