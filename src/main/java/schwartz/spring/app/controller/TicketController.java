@@ -37,9 +37,7 @@ public class TicketController {
 
     @GetMapping("/list")
     public ResponseEntity<List<TicketListResponse>> list(@RequestBody(required = false) TicketListRequest request) {
-
         List<Ticket> ticket = ticketService.list(request);
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(TicketListResponse.from(ticket));
     }

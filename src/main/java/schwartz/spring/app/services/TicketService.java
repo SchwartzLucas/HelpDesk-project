@@ -2,6 +2,7 @@ package schwartz.spring.app.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import schwartz.spring.Exceptions.MissingAttributeException;
@@ -16,6 +17,7 @@ import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.ClientRepository;
 import schwartz.spring.app.repository.TicketRepository;
 import schwartz.spring.auth.domain.user.User;
+import schwartz.spring.auth.domain.user.UserRole;
 import schwartz.spring.auth.services.UserService;
 
 import java.time.LocalDateTime;
@@ -150,8 +152,75 @@ public class TicketService {
 
     public List<Ticket> list(TicketListRequest request) {
         User user = userService.getAuthenticatedUser();
+        List<Ticket> tickets = null;
         if (!Utils.isEmpty(request)) {
-            return ticketRepository.listAllWithFilters(user, request);
+            StringBuilder sql = new StringBuilder("SELECT t.* FROM ticket t WHERE 1=1");
+            List<String> conditions = new ArrayList<>();
+            Map<String, Object> params = new HashMap<>();
+
+            // create_date
+            if (request.create_date() != null) {
+                conditions.add("t.create_date = :create_date");
+                params.put("create_date", request.create_date());
+            }
+
+            // status
+            if (request.status() != null) {
+                conditions.add("t.status = :status");
+                params.put("status", request.status());
+            }
+
+            // category
+            if (request.category() != null) {
+                conditions.add("t.category = :category");
+                params.put("category", request.category());
+            }
+
+            // title (like)
+            if (!Utils.isEmpty(request.title())) {
+                conditions.add("LOWER(t.title) LIKE :title");
+                params.put("title", "%" + request.title().trim().toLowerCase() + "%");
+            }
+
+            // client_id (com lógica de permissão)
+            if (request.client_id() != null) {
+                if (UserRole.ADMIN_USER.equals(user.getRole()) || UserRole.SUPPORT_USER.equals(user.getRole())) {
+                    conditions.add("t.client_id = :client_id");
+                    params.put("client_id", request.client_id());
+                } else {
+                    conditions.add("t.client_id = :client_id");
+                    params.put("client_id", user.getClient_id());
+                }
+            }
+
+            // responsible_id
+            if (request.responsible_id() != null) {
+                conditions.add("t.responsible_id = :responsible_id");
+                params.put("responsible_id", request.responsible_id());
+            }
+
+            // priority
+            if (request.priority() != null) {
+                conditions.add("t.priority = :priority");
+                params.put("priority", request.priority());
+            }
+
+            // public_code (like)
+            if (!Utils.isEmpty(request.public_code())) {
+                conditions.add("LOWER(t.public_code) LIKE :public_code");
+                params.put("public_code", "%" + request.public_code().trim().toLowerCase() + "%");
+            }
+
+            // junta todas as condições
+            if (!conditions.isEmpty()) {
+                sql.append(" AND ").append(String.join(" AND ", conditions));
+            }
+
+            sql.append(" ORDER BY t.created_date ASC");
+            Query query = em.createNativeQuery(sql.toString(), Ticket.class);
+            params.forEach(query::setParameter);
+            List<Ticket> resultados = query.getResultList();
+            return resultados;
         }
         return ticketRepository.listAllByClient_id(user.getClient_id());
     }
