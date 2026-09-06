@@ -8,11 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import schwartz.spring.app.domain.team.Team;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +46,9 @@ public class User implements UserDetails {
     private Long client_id;
 
     public User(String login, String encryptedPassword, UserRole role) {
+        this.login = login;
+        this.password = encryptedPassword;
+        this.role = role;
     }
 
     @Override

@@ -3,7 +3,7 @@ package schwartz.spring.app.domain.ticket;
 import java.time.LocalDate;
 
 public record TicketListRequest(
-    LocalDate create_date,
+    LocalDate created_date,
     Integer status,
     Integer category,
     String title,

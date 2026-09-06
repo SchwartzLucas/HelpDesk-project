@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import schwartz.spring.auth.repository.user.UserRepository;
+import schwartz.spring.auth.services.TokenService;
 
 import java.io.IOException;
 

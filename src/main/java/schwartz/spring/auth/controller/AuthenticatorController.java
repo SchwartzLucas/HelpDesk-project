@@ -1,8 +1,7 @@
 package schwartz.spring.auth.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +12,7 @@ import schwartz.spring.auth.domain.user.AuthenticationDTO;
 import schwartz.spring.auth.domain.user.LoginResponseDTO;
 import schwartz.spring.auth.domain.user.RegisterDTO;
 import schwartz.spring.auth.domain.user.User;
-import schwartz.spring.auth.infra.security.TokenService;
+import schwartz.spring.auth.services.TokenService;
 import schwartz.spring.auth.repository.user.UserRepository;
 
 import java.util.Objects;
@@ -21,8 +20,6 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/auth")
 public class AuthenticatorController{
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticatorController.class);
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -37,9 +34,9 @@ public class AuthenticatorController{
         try {
             var auth = this.authenticationManager.authenticate(userNamePassword);
             var token = tokenService.generateToken((User) Objects.requireNonNull(auth.getPrincipal()));
-            return ResponseEntity.ok(new LoginResponseDTO(token));
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponseDTO(token));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 

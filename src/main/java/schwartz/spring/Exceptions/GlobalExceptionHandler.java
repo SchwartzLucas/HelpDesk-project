@@ -1,5 +1,7 @@
 package schwartz.spring.Exceptions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ClientAlreadyExistsException.class)
     public ProblemDetail handleClientAlreadyExists(
@@ -58,6 +62,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUnexpected(
             Exception exception
     ) {
+        log.error("Exceção lançada: {}", (Object) exception.getStackTrace());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", 500);
         body.put("error", "INTERNAL_SERVER_ERROR");

@@ -1,4 +1,4 @@
-package schwartz.spring.auth.infra.security;
+package schwartz.spring.auth.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -6,16 +6,22 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import schwartz.spring.Utils.TimeConfiguration;
 import schwartz.spring.auth.domain.user.User;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
+    private final TimeConfiguration timeConfiguration;
+
+    public TokenService(TimeConfiguration timeConfiguration) {
+        this.timeConfiguration = timeConfiguration;
+    }
+
     public String generateToken(User user){
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -43,26 +49,7 @@ public class TokenService {
         }
     }
 
-    /**
-     * Extrai o ID do usuário a partir do token JWT.
-     * Retorna null se o token for inválido ou não tiver o claim userId.
-     */
-    public Long getUserIdFromToken(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            var decoded = JWT.require(algorithm)
-                    .withIssuer("auth-help-desk")
-                    .build()
-                    .verify(token);
-
-            // Retorna o claim "userId" como Long (ajuste para Integer/UUID se necessário)
-            return decoded.getClaim("userId").asLong();
-        } catch (JWTVerificationException e) {
-            return null;
-        }
-    }
-
     private Instant generateExpirationData(){
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+        return timeConfiguration.clock().instant().plus(2, ChronoUnit.HOURS);
     }
 }

@@ -5,13 +5,10 @@ import schwartz.spring.app.domain.team.Team;
 
 import java.util.List;
 
-public interface TeamRepository extends JpaRepository<Team, String> {
+public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    @Override
+
     List<Team> findAll();
-    List<Team> findAllByDescription(String description);
-    List<Team> findAllByPublicId(Long publicId);
-    void deleteByPublicId(Long publicId);
 }
 
 

@@ -50,7 +50,7 @@ public class TicketService {
 
     public Ticket create(TicketCreateRequest request) {
         User user = userService.getAuthenticatedUser();
-        Client client = clientRepository.findById(user.getClient_id());
+        Client client = clientRepository.findByUserClientId(user.getClient_id());
         String title = request.title();
         String description = request.description();
         Integer category = request.category();
@@ -152,16 +152,15 @@ public class TicketService {
 
     public List<Ticket> list(TicketListRequest request) {
         User user = userService.getAuthenticatedUser();
-        List<Ticket> tickets = null;
         if (!Utils.isEmpty(request)) {
             StringBuilder sql = new StringBuilder("SELECT t.* FROM ticket t WHERE 1=1");
             List<String> conditions = new ArrayList<>();
             Map<String, Object> params = new HashMap<>();
 
             // create_date
-            if (request.create_date() != null) {
-                conditions.add("t.create_date = :create_date");
-                params.put("create_date", request.create_date());
+            if (request.created_date() != null) {
+                conditions.add("t.created_date = :created_date");
+                params.put("created_date", request.created_date());
             }
 
             // status
