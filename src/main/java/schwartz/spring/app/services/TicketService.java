@@ -50,7 +50,7 @@ public class TicketService {
 
     public Ticket create(TicketCreateRequest request) {
         User user = userService.getAuthenticatedUser();
-        Client client = clientRepository.findByUserClientId(user.getClient_id());
+        Client client = clientRepository.findClientById(user.getClient_id());
         String title = request.title();
         String description = request.description();
         Integer category = request.category();

@@ -1,6 +1,6 @@
 package schwartz.spring.auth.domain.user;
 
-public record LoginResponseDTO(
+public record LoginResponse(
         String token
 ) {
 }

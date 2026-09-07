@@ -14,15 +14,15 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 public class TokenService {
+    private final TimeConfiguration timeConfiguration;
     @Value("${api.security.token.secret}")
     private String secret;
-    private final TimeConfiguration timeConfiguration;
 
     public TokenService(TimeConfiguration timeConfiguration) {
         this.timeConfiguration = timeConfiguration;
     }
 
-    public String generateToken(User user){
+    public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
@@ -36,8 +36,8 @@ public class TokenService {
         }
     }
 
-    public String validateJWTToken(String token){
-        try{
+    public String validateJWTToken(String token) {
+        try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
                     .withIssuer("auth-help-desk")
@@ -49,7 +49,7 @@ public class TokenService {
         }
     }
 
-    private Instant generateExpirationData(){
+    private Instant generateExpirationData() {
         return timeConfiguration.clock().instant().plus(2, ChronoUnit.HOURS);
     }
 }

@@ -8,10 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import schwartz.spring.auth.domain.user.AuthenticationDTO;
-import schwartz.spring.auth.domain.user.LoginResponseDTO;
-import schwartz.spring.auth.domain.user.RegisterDTO;
-import schwartz.spring.auth.domain.user.User;
+import schwartz.spring.auth.domain.user.*;
 import schwartz.spring.auth.services.TokenService;
 import schwartz.spring.auth.repository.user.UserRepository;
 
@@ -29,19 +26,20 @@ public class AuthenticatorController{
     private TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Validated AuthenticationDTO data){
-        var userNamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
+    public ResponseEntity login(@RequestBody @Validated AuthenticationRequest request){
+
+        var userNamePassword = new UsernamePasswordAuthenticationToken(request.login(), request.password());
         try {
             var auth = this.authenticationManager.authenticate(userNamePassword);
             var token = tokenService.generateToken((User) Objects.requireNonNull(auth.getPrincipal()));
-            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponseDTO(token));
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(token));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody @Validated RegisterDTO data){
+    public ResponseEntity register(@RequestBody @Validated RegisterRequest data){
         if(this.userRepository.findByLogin(data.login()) != null) {
             return ResponseEntity.badRequest().build();
         }
