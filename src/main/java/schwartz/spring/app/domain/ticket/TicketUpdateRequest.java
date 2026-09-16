@@ -1,5 +1,6 @@
 package schwartz.spring.app.domain.ticket;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record TicketUpdateRequest(
@@ -8,7 +9,9 @@ public record TicketUpdateRequest(
         String description,
         Integer priority,
         Integer status,
-        Long team_id,
-        Long responsable_id
+        Long teamId,
+        Long responsableId,
+        Integer category,
+        LocalDateTime deadline
 ) {
 }

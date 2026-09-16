@@ -4,9 +4,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import schwartz.spring.Exceptions.ClientAlreadyExistsException;
 import schwartz.spring.app.domain.client.Client;
+import schwartz.spring.app.domain.client.ClientResponse;
 import schwartz.spring.app.domain.client.ClientCreateRequest;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.ClientRepository;
+
+import java.util.List;
 
 @Service
 public class ClientService {
@@ -46,5 +49,11 @@ public class ClientService {
         clientRepository.save(client);
 
         return client;
+    }
+
+    public List<ClientResponse> list() {
+        return clientRepository.findAll().stream()
+                .map(ClientResponse::from)
+                .toList();
     }
 }

@@ -1,0 +1,30 @@
+@if (visible()) {
+  <div class="timer-widget">
+    <div class="timer-head">
+      @if (running()) {
+        <span class="dot"></span>
+        <span class="head-label">Cronômetro ativo</span>
+      } @else {
+        <span class="dot paused"></span>
+        <span class="head-label">Cronômetro pausado</span>
+      }
+    </div>
+
+    <div class="timer-body">
+      <div class="timer-meta">
+        <span class="timer-code">{{ active()?.ticketPublicCode }}</span>
+        <span class="timer-title">{{ active()?.ticketTitle }}</span>
+      </div>
+      <div class="timer-time">{{ elapsed() }}</div>
+    </div>
+
+    <div class="timer-actions">
+      @if (running()) {
+        <button class="btn btn-outline btn-sm" (click)="pause()">Pausar</button>
+        <button class="btn btn-primary btn-sm" (click)="stop()">Parar</button>
+      } @else {
+        <button class="btn btn-primary btn-sm" (click)="resume()">Reiniciar</button>
+      }
+    </div>
+  </div>
+}

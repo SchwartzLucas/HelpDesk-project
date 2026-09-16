@@ -1,6 +1,11 @@
 package schwartz.spring.auth.domain.user;
 
 public record RegisterRequest(
-        String login, String password, UserRole role
+        String name,
+        String login,
+        String password,
+        UserRole role,
+        Long teamId,
+        Long clientId
 ) {
 }

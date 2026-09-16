@@ -50,6 +50,8 @@ public class Ticket {
     private Long responsibleId;
     @Column(name = "sla_expiration", nullable = false)
     private LocalDateTime slaExpiration;
+    @Column(name = "deadline")
+    private LocalDateTime deadline;
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
     @Column(name = "updated_date", nullable = false)

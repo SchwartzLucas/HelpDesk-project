@@ -3,13 +3,17 @@ package schwartz.spring.app.domain.ticket;
 import java.time.LocalDate;
 
 public record TicketListRequest(
-    LocalDate created_date,
-    Integer status,
-    Integer category,
-    String title,
-    Long client_id,
-    Long responsible_id,
-    Integer priority,
-    String public_code
+        String public_code,
+        String title,
+        Integer status,
+        Integer category,
+        Integer priority,
+        Long client_id,
+        Long team_id,
+        Long responsable_id,
+        LocalDate deadline_from,
+        LocalDate deadline_to,
+        String period,
+        LocalDate created_date
 ) {
 }

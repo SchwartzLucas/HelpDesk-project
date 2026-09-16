@@ -26,26 +26,45 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "public_id", nullable = false, unique = true, columnDefinition = "BINARY(16)")
+    private java.util.UUID publicId;
+
+    @Column(name = "public_code", unique = true, length = 30)
+    private String publicCode;
+
+    @Size(max = 250)
+    @NotNull
+    @Column(name = "name", nullable = false, length = 250)
+    private String name;
+
     @Size(max = 100)
     @NotNull
-    @Column(name = "login", nullable = false, length = 100)
+    @Column(name = "login", nullable = false, length = 100, unique = true)
     private String login;
+
     @Size(max = 250)
     @NotNull
     @Column(name = "password", nullable = false, length = 250)
     private String password;
-    @Enumerated(EnumType.ORDINAL)
+
+    @Convert(converter = UserRoleConverter.class)
+    @Column(name = "role", nullable = false)
     private UserRole role;
+
     @Column(name = "team_id")
     private Long teamId;
+
     @NotNull
     @ColumnDefault("1")
     @Column(name = "is_active", nullable = false)
     private Byte isActive;
-    @Column(name = "client_id")
-    private Long client_id;
 
-    public User(String login, String encryptedPassword, UserRole role) {
+    @Column(name = "client_id")
+    private Long clientId;
+
+    public User(String name, String login, String encryptedPassword, UserRole role) {
+        this.name = name;
         this.login = login;
         this.password = encryptedPassword;
         this.role = role;
@@ -54,12 +73,16 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role.equals(UserRole.ADMIN_USER)) {
-            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
+            return List.of(
+                    new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_SUPPORT"),
-                    new SimpleGrantedAuthority("ROLE_USER"));
+                    new SimpleGrantedAuthority("ROLE_USER")
+            );
         } else if (this.role.equals(UserRole.SUPPORT_USER)) {
-            return List.of(new SimpleGrantedAuthority("ROLE_SUPPORT"),
-                    new SimpleGrantedAuthority("ROLE_USER"));
+            return List.of(
+                    new SimpleGrantedAuthority("ROLE_SUPPORT"),
+                    new SimpleGrantedAuthority("ROLE_USER")
+            );
         } else {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }

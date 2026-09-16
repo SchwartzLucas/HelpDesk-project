@@ -1,0 +1,222 @@
+<div class="page">
+  <div class="greeting">
+    <h1>{{ greeting() }}, {{ userName() }}</h1>
+    <button class="btn btn-outline btn-sm" (click)="refreshTab()">↻ Atualizar</button>
+  </div>
+
+  <div class="overview-grid">
+    @if (overview(); as ov) {
+      <div class="stat-card">
+        <div class="stat-label">Hoje</div>
+        <div class="stat-value">{{ ov.today }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Esta semana</div>
+        <div class="stat-value">{{ ov.week }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Este mês</div>
+        <div class="stat-value">{{ ov.month }}</div>
+      </div>
+      <div class="stat-card highlight-red">
+        <div class="stat-label">Atrasadas</div>
+        <div class="stat-value">{{ ov.overdue }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Em andamento</div>
+        <div class="stat-value">{{ ov.inProgress }}</div>
+      </div>
+      <div class="stat-card highlight-green">
+        <div class="stat-label">Concluídas</div>
+        <div class="stat-value">{{ ov.done }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total</div>
+        <div class="stat-value">{{ ov.total }}</div>
+      </div>
+    }
+  </div>
+
+  <div class="tabs">
+    <button [class.active]="activeTab() === 'hoje'" (click)="selectTab('hoje')">Hoje</button>
+    <button [class.active]="activeTab() === 'semana'" (click)="selectTab('semana')">Semana</button>
+    <button [class.active]="activeTab() === 'mes'" (click)="selectTab('mes')">Mês</button>
+    <button [class.active]="activeTab() === 'cliente'" (click)="selectTab('cliente')">Por cliente</button>
+    <button [class.active]="activeTab() === 'time'" (click)="selectTab('time')">Por time</button>
+  </div>
+
+  <div class="tab-content">
+    @switch (activeTab()) {
+      @case ('hoje') { @if (periodTickets().length === 0) {
+        <div class="empty-state"><div class="empty-title">Nenhuma demanda para hoje</div></div>
+      } @else {
+        <table class="table"><thead><tr>
+          <th>Código</th><th>Título</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Cronômetro</th>
+        </tr></thead><tbody>
+        @for (t of periodTickets(); track t.id) {
+          <tr [class.row-done]="isDone(t)">
+            <td class="code">{{ t.publicCode }}</td>
+            <td class="bold">{{ t.title }}</td>
+            <td>{{ t.clientName }}</td>
+            <td>{{ t.responsableName }}</td>
+            <td>
+              {{ fmtDate(t.deadline) }}
+              @if (t.deadline && !isDone(t)) {
+                <span class="remaining" [class.overdue]="isOverdue(t)">{{ remaining(t) }}</span>
+              }
+            </td>
+            <td>
+              <div class="timer-row">
+                @if (!isRunningOn(t) && !isPausedOn(t)) {
+                  <button class="btn btn-primary btn-sm" (click)="startTimer(t)" [disabled]="isDone(t)">▶ Iniciar</button>
+                } @else if (isRunningOn(t)) {
+                  <button class="btn btn-outline btn-sm" (click)="pauseTimer(t)">⏸</button>
+                  <button class="btn btn-danger btn-sm" (click)="stopTimer(t)">⏹</button>
+                } @else {
+                  <button class="btn btn-primary btn-sm" (click)="startTimer(t)">▶</button>
+                  <button class="btn btn-danger btn-sm" (click)="stopTimer(t)">⏹</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }</tbody></table>
+      } }
+
+      @case ('semana') { @if (periodTickets().length === 0) {
+        <div class="empty-state"><div class="empty-title">Nenhuma demanda para esta semana</div></div>
+      } @else {
+        <table class="table"><thead><tr>
+          <th>Código</th><th>Título</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Cronômetro</th>
+        </tr></thead><tbody>
+        @for (t of periodTickets(); track t.id) {
+          <tr [class.row-done]="isDone(t)">
+            <td class="code">{{ t.publicCode }}</td>
+            <td class="bold">{{ t.title }}</td>
+            <td>{{ t.clientName }}</td>
+            <td>{{ t.responsableName }}</td>
+            <td>
+              {{ fmtDate(t.deadline) }}
+              @if (t.deadline && !isDone(t)) {
+                <span class="remaining" [class.overdue]="isOverdue(t)">{{ remaining(t) }}</span>
+              }
+            </td>
+            <td>
+              <div class="timer-row">
+                @if (!isRunningOn(t) && !isPausedOn(t)) {
+                  <button class="btn btn-primary btn-sm" (click)="startTimer(t)" [disabled]="isDone(t)">▶ Iniciar</button>
+                } @else if (isRunningOn(t)) {
+                  <button class="btn btn-outline btn-sm" (click)="pauseTimer(t)">⏸</button>
+                  <button class="btn btn-danger btn-sm" (click)="stopTimer(t)">⏹</button>
+                } @else {
+                  <button class="btn btn-primary btn-sm" (click)="startTimer(t)">▶</button>
+                  <button class="btn btn-danger btn-sm" (click)="stopTimer(t)">⏹</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }</tbody></table>
+      } }
+
+      @case ('mes') { @if (periodTickets().length === 0) {
+        <div class="empty-state"><div class="empty-title">Nenhuma demanda para este mês</div></div>
+      } @else {
+        <table class="table"><thead><tr>
+          <th>Código</th><th>Título</th><th>Cliente</th><th>Responsável</th><th>Prazo</th><th>Cronômetro</th>
+        </tr></thead><tbody>
+        @for (t of periodTickets(); track t.id) {
+          <tr [class.row-done]="isDone(t)">
+            <td class="code">{{ t.publicCode }}</td>
+            <td class="bold">{{ t.title }}</td>
+            <td>{{ t.clientName }}</td>
+            <td>{{ t.responsableName }}</td>
+            <td>
+              {{ fmtDate(t.deadline) }}
+              @if (t.deadline && !isDone(t)) {
+                <span class="remaining" [class.overdue]="isOverdue(t)">{{ remaining(t) }}</span>
+              }
+            </td>
+            <td>
+              <div class="timer-row">
+                @if (!isRunningOn(t) && !isPausedOn(t)) {
+                  <button class="btn btn-primary btn-sm" (click)="startTimer(t)" [disabled]="isDone(t)">▶ Iniciar</button>
+                } @else if (isRunningOn(t)) {
+                  <button class="btn btn-outline btn-sm" (click)="pauseTimer(t)">⏸</button>
+                  <button class="btn btn-danger btn-sm" (click)="stopTimer(t)">⏹</button>
+                } @else {
+                  <button class="btn btn-primary btn-sm" (click)="startTimer(t)">▶</button>
+                  <button class="btn btn-danger btn-sm" (click)="stopTimer(t)">⏹</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }</tbody></table>
+      } }
+
+      @case ('cliente') {
+        @if (byClient().length === 0) {
+          <div class="empty-state"><div class="empty-title">Sem dados</div></div>
+        } @else {
+          <div class="groups-grid">
+          @for (g of byClient(); track g.id) {
+            <details class="group-card">
+              <summary>
+                <span class="group-name">{{ g.name }}</span>
+                <span class="badge">{{ g.count }} demandas</span>
+                @if (g.done > 0) { <span class="badge status-done">{{ g.done }} concluídas</span> }
+                @if (g.overdue > 0) { <span class="badge overdue-badge">{{ g.overdue }} atrasadas</span> }
+              </summary>
+              <table class="table inner-table"><tbody>
+                @for (t of g.tickets; track t.id) {
+                  <tr>
+                    <td class="code">{{ t.publicCode }}</td>
+                    <td class="bold">{{ t.title }}</td>
+                    <td><span class="badge" [ngClass]="classOf(t.status)">{{ statusOf(t.status) }}</span></td>
+                    <td>{{ fmtDate(t.deadline) }}</td>
+                  </tr>
+                }</tbody></table>
+            </details>
+          }
+          </div>
+        }
+      }
+
+      @case ('time') {
+        @if (byTeam().length === 0) {
+          <div class="empty-state"><div class="empty-title">Sem dados</div></div>
+        } @else {
+          <div class="groups-grid">
+          @for (row of byTeam(); track row.teamId) {
+            <details class="group-card team-card">
+              <summary>
+                <span class="group-name">{{ row.teamName }}</span>
+                <span class="badge">{{ row.members.length }} membros</span>
+              </summary>
+              <div class="team-members">
+                @for (member of row.members; track member.id) {
+                  <details class="member-card">
+                    <summary>
+                      <span class="member-name">{{ member.name }}</span>
+                      <span class="badge">{{ member.count }} demandas</span>
+                      @if (member.done > 0) { <span class="badge status-done">{{ member.done }} concluídas</span> }
+                      @if (member.overdue > 0) { <span class="badge overdue-badge">{{ member.overdue }} atrasadas</span> }
+                    </summary>
+                    <table class="table inner-table"><tbody>
+                      @for (t of member.tickets; track t.id) {
+                        <tr>
+                          <td class="code">{{ t.publicCode }}</td>
+                          <td class="bold">{{ t.title }}</td>
+                          <td><span class="badge" [ngClass]="classOf(t.status)">{{ statusOf(t.status) }}</span></td>
+                          <td>{{ fmtDate(t.deadline) }}</td>
+                        </tr>
+                      }</tbody></table>
+                  </details>
+                }
+              </div>
+            </details>
+          }
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

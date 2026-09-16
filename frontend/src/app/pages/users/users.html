@@ -1,0 +1,92 @@
+<div class="page">
+  <div class="page-head">
+    <h1>Usuários</h1>
+    @if (isAdmin()) {
+      <button class="btn btn-primary" (click)="openForm()">+ Novo usuário</button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <div class="card form-card">
+      <h3>Novo usuário</h3>
+      <div class="grid-2">
+        <div class="field">
+          <label>Nome *</label>
+          <input [(ngModel)]="name" name="name" type="text" placeholder="Nome da pessoa" />
+        </div>
+        <div class="field">
+          <label>Login *</label>
+          <input [(ngModel)]="login" name="login" type="text" placeholder="usuario" />
+        </div>
+        <div class="field">
+          <label>Senha *</label>
+          <input [(ngModel)]="password" name="password" type="password" placeholder="••••••" />
+        </div>
+        <div class="field">
+          <label>Papel</label>
+          <select [(ngModel)]="role" name="role">
+            @for (r of roleOptions; track r) {
+              <option [ngValue]="r">{{ roleLabels[r] }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <select [(ngModel)]="teamId" name="teamId">
+            <option [ngValue]="null">— Sem time —</option>
+            @for (t of teams(); track t.id) {
+              <option [ngValue]="t.internalId">{{ t.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label>Cliente</label>
+          <select [(ngModel)]="clientId" name="clientId">
+            <option [ngValue]="null">— Sem cliente —</option>
+            @for (c of clients(); track c.id) {
+              <option [ngValue]="c.internalId">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      @if (error()) {
+        <div class="form-error">{{ error() }}</div>
+      }
+      <div class="form-actions">
+        <button class="btn btn-outline" (click)="cancelForm()">Cancelar</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Criar usuário' }}</button>
+      </div>
+    </div>
+  }
+
+  <div class="card table-card">
+    @if (loading()) {
+      <div class="empty-state">Carregando…</div>
+    } @else if (users().length === 0) {
+      <div class="empty-state">
+        <div class="empty-title">Nenhum usuário encontrado</div>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Login</th>
+            <th>Papel</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr>
+              <td class="bold">{{ u.name }}</td>
+              <td>{{ u.login }}</td>
+              <td><span class="badge role-badge">{{ roleLabels[u.role] }}</span></td>
+              <td>{{ u.teamName ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

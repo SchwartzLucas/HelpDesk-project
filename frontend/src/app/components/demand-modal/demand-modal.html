@@ -1,0 +1,103 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="close()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h2>{{ editMode() ? 'Editar demanda' : 'Nova demanda' }}</h2>
+        <button class="btn btn-icon" (click)="close()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="field">
+          <label>Título *</label>
+          <input [(ngModel)]="title" name="title" type="text" placeholder="O que precisa ser feito?" />
+        </div>
+
+        <div class="field">
+          <label>Descrição</label>
+          <textarea [(ngModel)]="description" name="description" placeholder="Detalhes da demanda"></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Prioridade</label>
+            <select [(ngModel)]="priority" name="priority">
+              @for (p of priorityOptions; track p) {
+                <option [value]="p">{{ priorityLabels[p] ?? '' }}</option>
+              }
+            </select>
+          </div>
+
+          @if (editMode()) {
+            <div class="field">
+              <label>Status</label>
+              <select [(ngModel)]="status" name="status">
+                <option [ngValue]="1">Não iniciado</option>
+                <option [ngValue]="2">Em andamento</option>
+                <option [ngValue]="3">Pausado</option>
+                <option [ngValue]="4">Concluído</option>
+                <option [ngValue]="5">Fechado</option>
+              </select>
+            </div>
+          } @else {
+            <div class="field">
+              <label>Prazo (opcional)</label>
+              <input [(ngModel)]="deadline" name="deadline" type="datetime-local" />
+            </div>
+          }
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Cliente</label>
+            <select [(ngModel)]="clientId" name="clientId">
+              <option [ngValue]="null">— Selecione —</option>
+              @for (c of clients; track c.id) {
+                <option [ngValue]="c.internalId">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Time</label>
+            <select [(ngModel)]="teamId" name="teamId">
+              <option [ngValue]="null">— Selecione —</option>
+              @for (t of teams; track t.id) {
+                <option [ngValue]="t.id">{{ t.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Responsável</label>
+            <select [(ngModel)]="responsableId" name="responsableId">
+              <option [ngValue]="null">— Selecione —</option>
+              @for (u of users; track u.id) {
+                <option [ngValue]="u.internalId">{{ u.name }}</option>
+              }
+            </select>
+          </div>
+
+          @if (editMode()) {
+            <div class="field">
+              <label>Prazo (opcional)</label>
+              <input [(ngModel)]="deadline" name="deadline2" type="datetime-local" />
+            </div>
+          }
+        </div>
+
+        @if (error()) {
+          <div class="modal-error">{{ error() }}</div>
+        }
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-outline" (click)="close()">Cancelar</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+          {{ saving() ? 'Salvando…' : editMode() ? 'Salvar' : 'Criar demanda' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

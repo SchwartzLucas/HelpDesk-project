@@ -1,0 +1,132 @@
+<div class="page">
+  <div class="page-head">
+    <h1>{{ pageTitle() }}</h1>
+    <button class="btn btn-primary" (click)="openCreate()">+ Nova demanda</button>
+  </div>
+
+  <div class="filters card">
+    <input
+      class="filter-search"
+      type="text"
+      placeholder="Buscar por título ou código…"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+    <select class="filter-select" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); reload()">
+      <option [ngValue]="null">Todos os status</option>
+      @for (s of statusOptions; track s) {
+        <option [ngValue]="s">{{ statusLabels[s] }}</option>
+      }
+    </select>
+    <select class="filter-select" [ngModel]="priorityFilter()" (ngModelChange)="priorityFilter.set($event); reload()">
+      <option [ngValue]="null">Todas as prioridades</option>
+      @for (p of priorityOptions; track p) {
+        <option [ngValue]="p">{{ priorityLabels[p] }}</option>
+      }
+    </select>
+    <label class="filter-check">
+      <input type="checkbox" [checked]="overdueOnly()" (change)="overdueOnly.set(!overdueOnly())" />
+      Só atrasadas
+    </label>
+    @if (search() || statusFilter() || priorityFilter() || overdueOnly()) {
+      <button class="btn btn-outline btn-sm" (click)="clearFilters()">Limpar</button>
+    }
+  </div>
+
+  <div class="card table-card">
+    @if (loading()) {
+      <div class="empty-state">Carregando…</div>
+    } @else if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-title">Nenhuma demanda encontrada</div>
+        <div>Cadastre uma nova demanda para começar.</div>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Título</th>
+            <th>Cliente</th>
+            <th>Time</th>
+            <th>Responsável</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Prazo</th>
+            <th>Tempo</th>
+            <th>Cronômetro</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ticket of filtered(); track ticket.id) {
+            <tr [class.row-done]="done(ticket)">
+              <td class="code">{{ ticket.publicCode }}</td>
+              <td>
+                <div class="title-cell" (click)="openEdit(ticket)">
+                  {{ ticket.title }}
+                  @if (overdue(ticket)) {
+                    <span class="badge overdue-badge">Atrasada</span>
+                  }
+                </div>
+              </td>
+              <td>{{ ticket.clientName }}</td>
+              <td>{{ ticket.teamName }}</td>
+              <td>{{ ticket.responsableName }}</td>
+              <td>
+                <span class="badge" [ngClass]="classOf(ticket)">{{ statusOf(ticket) }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="priClass(ticket)">{{ priLabel(ticket) }}</span>
+              </td>
+              <td>
+                <div class="deadline-cell">
+                  {{ fmtDate(ticket.deadline) }}
+                  @if (ticket.deadline && !done(ticket)) {
+                    <span class="remaining" [class.overdue]="overdue(ticket)">
+                      ({{ remaining(ticket) }})
+                    </span>
+                  }
+                </div>
+              </td>
+              <td class="time-cell">
+                {{ fmtDuration(ticket.totalSeconds) }}
+                @if (ticket.totalSeconds > 0) {
+                  <span class="muted">({{ fmtDurationShort(ticket.totalSeconds) }})</span>
+                }
+              </td>
+              <td>
+                <div class="timer-actions">
+                  @if (!isRunningOn(ticket) && !isPausedOn(ticket)) {
+                    <button
+                      class="btn btn-primary btn-sm"
+                      (click)="startTimer(ticket)"
+                      [disabled]="done(ticket)"
+                      title="Iniciar cronômetro"
+                    >
+                      ▶ Iniciar
+                    </button>
+                  }
+                  @if (isRunningOn(ticket)) {
+                    <button class="btn btn-outline btn-sm" (click)="pauseTimer(ticket)" title="Pausar">⏸ Pausar</button>
+                    <button class="btn btn-danger btn-sm" (click)="stopTimer(ticket)" title="Parar e registrar">⏹ Parar</button>
+                  }
+                  @if (isPausedOn(ticket)) {
+                    <button class="btn btn-primary btn-sm" (click)="startTimer(ticket)" title="Retomar">▶ Retomar</button>
+                    <button class="btn btn-danger btn-sm" (click)="stopTimer(ticket)" title="Finalizar">⏹ Finalizar</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<app-demand-modal
+  [clients]="clients()"
+  [teams]="teams()"
+  [users]="users()"
+  (ready)="onModalReady($event)"
+/>

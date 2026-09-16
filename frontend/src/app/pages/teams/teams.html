@@ -1,0 +1,73 @@
+<div class="page">
+  <div class="page-head">
+    <h1>Times</h1>
+    @if (isAdmin()) {
+      <button class="btn btn-primary" (click)="openForm()">+ Novo time</button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <div class="card form-card">
+      <h3>Novo time</h3>
+      <div class="grid-2">
+        <div class="field">
+          <label>Nome *</label>
+          <input [(ngModel)]="name" name="name" type="text" placeholder="Ex.: Suporte TI" />
+        </div>
+        <div class="field">
+          <label>Gestor</label>
+          <select [(ngModel)]="managerId" name="managerId">
+            <option [ngValue]="null">— Selecione —</option>
+            @for (u of users(); track u.id) {
+              <option [ngValue]="u.internalId">{{ u.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <input [(ngModel)]="description" name="description" type="text" placeholder="Responsabilidades do time" />
+      </div>
+      @if (error()) {
+        <div class="form-error">{{ error() }}</div>
+      }
+      <div class="form-actions">
+        <button class="btn btn-outline" (click)="cancelForm()">Cancelar</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Criar time' }}</button>
+      </div>
+    </div>
+  }
+
+  <div class="card table-card">
+    @if (loading()) {
+      <div class="empty-state">Carregando…</div>
+    } @else if (teams().length === 0) {
+      <div class="empty-state">
+        <div class="empty-title">Nenhum time cadastrado</div>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Gestor</th>
+            <th>Membros</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of teams(); track t.id) {
+            <tr>
+              <td class="code">{{ t.publicCode }}</td>
+              <td class="bold">{{ t.name }}</td>
+              <td>{{ t.description }}</td>
+              <td>{{ t.managerName }}</td>
+              <td>{{ t.memberCount }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

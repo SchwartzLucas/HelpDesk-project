@@ -1,0 +1,62 @@
+@use '../../../styles/variables.scss' as *;
+
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 14px;
+  box-shadow: $shadow;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: $primary;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: $muted;
+    font-size: 13px;
+    margin-bottom: 26px;
+  }
+
+  .error {
+    background: #fef2f2;
+    color: $danger;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  button {
+    width: 100%;
+    justify-content: center;
+    padding: 11px;
+    margin-top: 6px;
+  }
+}

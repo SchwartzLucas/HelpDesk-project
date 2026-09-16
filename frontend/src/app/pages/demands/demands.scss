@@ -1,0 +1,123 @@
+@use '../../../styles/variables.scss' as *;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  h1 {
+    font-size: 22px;
+  }
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+
+  .filter-search {
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 8px 12px;
+    width: 260px;
+    max-width: 100%;
+
+    &:focus {
+      outline: 2px solid $primary;
+      outline-offset: -1px;
+      border-color: transparent;
+    }
+  }
+
+  .filter-select {
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 160px;
+
+    &:focus {
+      outline: 2px solid $primary;
+      outline-offset: -1px;
+    }
+  }
+
+  .filter-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: $text;
+    cursor: pointer;
+    white-space: nowrap;
+    input {
+      accent-color: $primary;
+    }
+  }
+}
+
+.table-card {
+  overflow: hidden;
+}
+
+.table {
+  min-width: 960px;
+
+  .code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: $primary;
+    white-space: nowrap;
+  }
+
+  .title-cell {
+    font-weight: 500;
+    cursor: pointer;
+    color: $text;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  .deadline-cell {
+    display: flex;
+    flex-direction: column;
+
+    .remaining {
+      font-size: 12px;
+      color: $muted;
+      &.overdue {
+        color: $danger;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .time-cell {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+
+  .timer-actions {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .row-done {
+    opacity: 0.55;
+  }
+}

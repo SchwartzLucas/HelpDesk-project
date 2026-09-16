@@ -1,0 +1,102 @@
+@use '../../../styles/variables.scss' as *;
+
+.timer-widget {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 290px;
+  background: #111827;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  z-index: 999;
+}
+
+.timer-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 1.2s ease-in-out infinite;
+
+    &.paused {
+      background: #f59e0b;
+      animation: none;
+    }
+  }
+
+  .head-label {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+}
+
+.timer-body {
+  padding: 14px 14px 4px;
+
+  .timer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+
+  .timer-code {
+    font-size: 11px;
+    color: #818cf8;
+    font-weight: 600;
+  }
+
+  .timer-title {
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .timer-time {
+    font-size: 30px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+}
+
+.timer-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #e5e7eb;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

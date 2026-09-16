@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="page-head">
+    <h1>Clientes</h1>
+    @if (isAdmin()) {
+      <button class="btn btn-primary" (click)="openForm()">+ Novo cliente</button>
+    }
+  </div>
+
+  @if (showForm()) {
+    <div class="card form-card">
+      <h3>Novo cliente</h3>
+      <div class="grid-2">
+        <div class="field">
+          <label>Nome *</label>
+          <input [(ngModel)]="name" name="name" type="text" placeholder="Razão social / Empresa" />
+        </div>
+        <div class="field">
+          <label>Email *</label>
+          <input [(ngModel)]="email" name="email" type="email" placeholder="contato@empresa.com" />
+        </div>
+      </div>
+      @if (error()) {
+        <div class="form-error">{{ error() }}</div>
+      }
+      <div class="form-actions">
+        <button class="btn btn-outline" (click)="cancelForm()">Cancelar</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Salvando…' : 'Criar cliente' }}</button>
+      </div>
+    </div>
+  }
+
+  <div class="card table-card">
+    @if (loading()) {
+      <div class="empty-state">Carregando…</div>
+    } @else if (clients().length === 0) {
+      <div class="empty-state">
+        <div class="empty-title">Nenhum cliente cadastrado</div>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of clients(); track c.id) {
+            <tr>
+              <td class="code">{{ c.publicCode }}</td>
+              <td class="bold">{{ c.name }}</td>
+              <td>{{ c.email }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

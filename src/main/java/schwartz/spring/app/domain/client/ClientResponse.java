@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public record ClientResponse(
         UUID id,
+        Long internalId,
         String publicCode,
         String name,
         String email
@@ -11,6 +12,7 @@ public record ClientResponse(
     public static ClientResponse from(Client client) {
         return new ClientResponse(
                 client.getPublicId(),
+                client.getId(),
                 client.getPublicCode(),
                 client.getName(),
                 client.getEmail()

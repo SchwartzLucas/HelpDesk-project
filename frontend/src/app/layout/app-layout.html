@@ -1,0 +1,51 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">HD</div>
+      <div class="brand-text">
+        <span class="brand-name">HelpDesk</span>
+        <span class="brand-sub">Demandas da equipe</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="icon">▦</span> Dashboard
+      </a>
+      <a routerLink="/demandas" routerLinkActive="active">
+        <span class="icon">☰</span> Minhas demandas
+      </a>
+      @if (isAdmin()) {
+        <a routerLink="/demandas/todas" routerLinkActive="active">
+          <span class="icon">◧</span> Todas as demandas
+        </a>
+        <a routerLink="/times" routerLinkActive="active">
+          <span class="icon">◎</span> Times
+        </a>
+        <a routerLink="/clientes" routerLinkActive="active">
+          <span class="icon">◈</span> Clientes
+        </a>
+        <a routerLink="/usuarios" routerLinkActive="active">
+          <span class="icon">☺</span> Usuários
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar">{{ userName().charAt(0) }}</div>
+        <div class="user-meta">
+          <span class="user-name">{{ userName() }}</span>
+          <span class="user-role">{{ roleLabel() }}</span>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <router-outlet />
+  </main>
+
+  <app-timer-widget />
+</div>

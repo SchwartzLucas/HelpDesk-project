@@ -1,7 +1,25 @@
-<app-defult-login-layout
-  title="Login into your account"
-  primaryBtnText="Login now"
-  secondaryBtnText="Register now"
->
+<div class="login-wrap">
+  <form class="login-card" (ngSubmit)="submit()">
+    <div class="logo">HD</div>
+    <h1>HelpDesk — Demandas</h1>
+    <p class="subtitle">Organize o que você tem para fazer, hoje, esta semana e este mês.</p>
 
-</app-defult-login-layout>
+    <div class="field">
+      <label>Login</label>
+      <input [(ngModel)]="login" name="login" type="text" autocomplete="username" />
+    </div>
+
+    <div class="field">
+      <label>Senha</label>
+      <input [(ngModel)]="password" name="password" type="password" autocomplete="current-password" />
+    </div>
+
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+
+    <button class="btn btn-primary" type="submit" [disabled]="loading()">
+      {{ loading() ? 'Entrando…' : 'Entrar' }}
+    </button>
+  </form>
+</div>
