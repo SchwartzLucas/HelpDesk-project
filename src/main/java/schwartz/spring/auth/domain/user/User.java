@@ -8,12 +8,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Table(name = "users")
 @Entity(name = "users")
@@ -44,6 +47,16 @@ public class User implements UserDetails {
     private Byte isActive;
     @Column(name = "client_id")
     private Long client_id;
+    @Size(max = 30)
+    @NotNull
+    @Column(name = "public_code", nullable = false, length = 30)
+    private String publicCode;
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @NotNull
+    @ColumnDefault("(UUID_TO_BIN(UUID()))")
+    @Column(name = "public_id", nullable = false, length = 16)
+    private UUID publicId;
+
 
     public User(String login, String encryptedPassword, UserRole role) {
         this.login = login;

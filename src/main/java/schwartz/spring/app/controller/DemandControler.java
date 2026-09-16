@@ -2,7 +2,6 @@ package schwartz.spring.app.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +24,7 @@ public class DemandControler {
 
     @PostMapping("/create")
     public ResponseEntity<DemandCreateResponse> create(@RequestBody @Validated DemandCreateRequest request){
-        Demand demand = DemandService.create(request);
+        Demand demand = demandService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(DemandCreateResponse.from(demand));
     }

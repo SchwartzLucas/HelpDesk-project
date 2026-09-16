@@ -1,8 +1,12 @@
 package schwartz.spring.app.domain.client;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -34,6 +38,9 @@ public class Client {
             unique = true,
             columnDefinition = "BINARY(16)"
     )
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @NotNull
+    @ColumnDefault("(UUID_TO_BIN(UUID()))")
     private UUID publicId;
 
     @Column(
@@ -41,9 +48,11 @@ public class Client {
             unique = true,
             length = 30
     )
+    @NotNull
     private String publicCode;
 
     @Column(nullable = false, length = 250)
+    @NotNull
     private String name;
 
     @Column(nullable = false, length = 250)

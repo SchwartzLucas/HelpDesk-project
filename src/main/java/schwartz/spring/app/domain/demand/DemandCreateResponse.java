@@ -6,7 +6,7 @@ public record DemandCreateResponse(
         UUID id,
         String public_code,
         String tile,
-        String decription
+        String description
 
 ) {
     public static DemandCreateResponse from(Demand demand){
