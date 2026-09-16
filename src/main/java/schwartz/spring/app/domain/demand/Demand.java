@@ -11,6 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -56,5 +57,26 @@ public class Demand {
     @ToString.Exclude
     @Column(name = "attachments", length = 150)
     private String attachments;
-
+    @NotNull
+    @ColumnDefault("(now())")
+    @ToString.Exclude
+    @Column(name = "create_time", nullable = false)
+    private Instant createTime;
+    @ToString.Exclude
+    @Column(name = "stopped_time")
+    private Instant stoppedTime;
+    @ToString.Exclude
+    @Column(name = "finish_time")
+    private Instant finishTime;
+    @Size(max = 100)
+    @ToString.Exclude
+    @Column(name = "user_name", length = 100)
+    private String userName;
+    @NotNull
+    @ToString.Exclude
+    @Column(name = "demand_status", nullable = false)
+    private Integer demandStatus;
+    @ToString.Exclude
+    @Column(name = "started_time")
+    private Instant startedTime;
 }
