@@ -10,7 +10,7 @@ public record DemandCreateResponse(
         String description,
         String user_name,
         Instant create_time,
-        Integer demand_status
+        DemandStatus demand_status
 
 ) {
     public static DemandCreateResponse from(Demand demand){

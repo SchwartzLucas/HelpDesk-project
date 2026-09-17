@@ -1,25 +1,21 @@
 package schwartz.spring.app.services;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import schwartz.spring.app.domain.demand.Demand;
-import schwartz.spring.app.domain.demand.DemandCreateRequest;
-import schwartz.spring.app.domain.demand.DemandUpdateRequest;
+import schwartz.spring.Utils.Utils;
+import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DemandRepository;
 import schwartz.spring.auth.domain.user.User;
 import schwartz.spring.auth.repository.user.UserRepository;
-
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import static schwartz.spring.app.domain.demand.DemandStatus.*;
 
 @Service
 public class DemandService {
-    private final static Integer DEMAND_STATUS_CREATED = 0;
-    private final static Integer DEMAND_STATUS_ACTIVE = 1;
-    private final static Integer DEMAND_STATUS_STOPPED = 2;
-    private final static Integer DEMAND_STATUS_FINISHED = 3;
-    private final static Integer DEMAND_STATUS_CANCELED = 4;
     private final PublicIdGenerator publicIdGenerator;
     private final DemandRepository demandRepository;
     private final UserRepository userRepository;
@@ -40,7 +36,7 @@ public class DemandService {
         demand.setDescription(request.description());
         demand.setUserId(user.getPublicId());
         demand.setUserDemandId(user_demand_id + 1);
-        demand.setDemandStatus(DEMAND_STATUS_CREATED);
+        demand.setDemandStatus(DemandStatus.CREATED);
         demandRepository.saveAndFlush(demand);
         demand.setPublicCode(String.format(
                         "DEM-%08d", demand.getUserDemandId()
@@ -50,38 +46,91 @@ public class DemandService {
         return demand;
     }
 
-    public Demand stop(UUID demandPublicId) {
-        // 0 = created demand | 1 = actual active demand | 2 = stopped demand | 3 = demand finished | 4 = canceled demand
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    public Demand update(UUID demandPublicId, DemandUpdateRequest request) {
         Demand demand = demandRepository.findByPublicId(demandPublicId);
-        if (!DEMAND_STATUS_ACTIVE.equals(demand.getDemandStatus())) {
+        if (Utils.isEmpty(demand)) {
             return null;
         }
+        if (!Utils.isEmpty(request.status())) {
+            final boolean ACTIVE_OR_CANCELED = request.status().equals(ACTIVE) || request.status().equals(CANCELED);
+            switch (demand.getDemandStatus()) {
+                case CREATED -> { // created demand
+                    if (ACTIVE_OR_CANCELED) {
+                        demand.setDemandStatus(request.status());
+                    }
+                    // TODO EXCEPTION: created demand can only be updated to active or canceled
+                }
+                case ACTIVE -> { // actual active demand
+                    if (request.status().equals(STOPPED) || request.status().equals(FINISHED)) {
+                        start(demand);
+                    }
+                    // TODO EXCEPTION: active demand can only be updated to stopped or finished
+                }
+                case STOPPED -> { // stopped demand
+                    if (request.status().equals(CREATED) || request.status().equals(FINISHED)) {
+                        stop(demand);
+                        demand.setDemandStatus(request.status());
+                    }
+                    // TODO EXCEPTION: stopped demand can only be updated to active or finished
+                }
+                case FINISHED -> { // finished demand
+                    if (request.status().equals(CANCELED) || request.status().equals(ACTIVE)) {
+                        demand.setDemandStatus(request.status());
+                    }
+                    // TODO EXCEPTION: finished demand can only be updated to canceled or active
+                }
+                case CANCELED -> { // canceled demand
+                    if (request.status().equals(REOPENED)) {
+                        demand.setDemandStatus(request.status());
+                    }
+                    // TODO EXCEPTION: canceled demand can only be updated to reopened
+                }
+                case REOPENED -> { // reopened demand}
+                    if (ACTIVE_OR_CANCELED) {
+                        demand.setDemandStatus(request.status());
+                    }
+                    // TODO EXCEPTION: reopened demand can only be updated to active or canceled
+
+                }
+            }
+        }
+        if (!Utils.isEmpty(request.title())) {
+            demand.setTitle(request.title());
+        }
+        if (!Utils.isEmpty(request.description())) {
+            demand.setDescription(request.description());
+        }
+        if (!Utils.isEmpty(request.user())) {
+            User user = userRepository.findByPublicId(request.user());
+            if (!Utils.isEmpty(user)) {
+                demand.setUserId(request.user());
+            }
+        }
+        demandRepository.saveAndFlush(demand);
+        return demand;
+    }
+
+    private void stop(Demand demand) {
         Instant now = Instant.now();
         demandRepository.updateStoppedTime(now, demand.getPublicId());
         demand.setStoppedTime(now);
-        demand.setDemandStatus(DEMAND_STATUS_STOPPED);
-        return demand;
+        demand.setDemandStatus(DemandStatus.STOPPED);
     }
 
     // TODO ver como fazer exceptions
-    public Demand start(UUID demandPublicId) {
-        Demand demand = demandRepository.findByPublicId(demandPublicId);
-        if (!DEMAND_STATUS_ACTIVE.equals(demand.getDemandStatus())
-                || DEMAND_STATUS_FINISHED.equals(demand.getDemandStatus())) {
-            return null;
-        }
+    private void start(Demand demand) {
         Instant now = Instant.now();
         demandRepository.updateStartTime(now, demand.getPublicId());
         demand.setStartedTime(now);
-        demand.setDemandStatus(DEMAND_STATUS_ACTIVE);
-        return demand;
+        demand.setDemandStatus(ACTIVE);
     }
 
-    public Demand update(UUID demandPublicId, DemandUpdateRequest request) {
-        Demand demand = demandRepository.findByPublicId(demandPublicId);
-
-
-
-        return demand;
+    public List<Demand> list(DemandListRequest request) {
+        if(Utils.isEmpty(request)){
+            return demandRepository.findAll();
+        }
     }
 }

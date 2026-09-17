@@ -75,8 +75,18 @@ public class Demand {
     @NotNull
     @ToString.Exclude
     @Column(name = "demand_status", nullable = false)
-    private Integer demandStatus;
+    private int demandStatusCode;
     @ToString.Exclude
     @Column(name = "started_time")
     private Instant startedTime;
+
+
+    @Transient
+    public DemandStatus getDemandStatus() {
+        return DemandStatus.fromCode(demandStatusCode);
+    }
+
+    public void setDemandStatus(DemandStatus status) {
+        this.demandStatusCode = status != null ? status.getCode() : null;
+    }
 }

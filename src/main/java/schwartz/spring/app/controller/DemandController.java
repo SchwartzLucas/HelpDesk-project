@@ -8,6 +8,7 @@ import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.services.DemandService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,28 +28,6 @@ public class DemandController {
                 .body(DemandCreateResponse.from(demand));
     }
 
-    @PostMapping("/stop/{demand_public_id}")
-    public ResponseEntity<DemandStopResponse> stop(@PathVariable UUID demand_public_id) {
-        if (Utils.isEmpty(demand_public_id)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(null);
-        }
-        Demand demand = demandService.stop(demand_public_id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(DemandStopResponse.from(demand));
-    }
-
-    @PostMapping("/start/{demand_public_id}")
-    public ResponseEntity<DemandStartResponse> start(@PathVariable UUID demand_public_id) {
-        if (Utils.isEmpty(demand_public_id)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(null);
-        }
-        Demand demand = demandService.start(demand_public_id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(DemandStartResponse.from(demand));
-    }
-
     @PostMapping("/update/{demand_public_id}")
     public ResponseEntity<DemandUpdateResponse> update(@PathVariable UUID demand_public_id,
                                                        @RequestBody(required = false) DemandUpdateRequest request) {
@@ -59,5 +38,12 @@ public class DemandController {
         Demand demand = demandService.update(demand_public_id, request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(DemandUpdateResponse.from(demand));
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<DemandListResponse>> list(@RequestBody(required = false) DemandListRequest request) {
+        List<Demand> demand = demandService.list(request);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(DemandListResponse.from(demand));
     }
 }
