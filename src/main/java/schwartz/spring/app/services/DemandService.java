@@ -1,5 +1,6 @@
 package schwartz.spring.app.services;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,9 +10,11 @@ import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DemandRepository;
 import schwartz.spring.auth.domain.user.User;
 import schwartz.spring.auth.repository.user.UserRepository;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+
 import static schwartz.spring.app.domain.demand.DemandStatus.*;
 
 @Service
@@ -129,8 +132,16 @@ public class DemandService {
     }
 
     public List<Demand> list(DemandListRequest request) {
-        if(Utils.isEmpty(request)){
+        if (Utils.isEmpty(request)) {
             return demandRepository.findAll();
         }
+        Specification<Demand> spec = Specification.where((root, query, cb) -> cb.conjunction());
+        if (!Utils.isEmpty(request.public_code())) {
+            spec = spec.and(((root, query, cb) ->
+                            cb.equal(root.get("public_code"), request.public_code())
+                    )
+            );
+        }
+        return demandRepository.findAll(spec);
     }
 }
