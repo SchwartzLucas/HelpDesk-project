@@ -9,6 +9,7 @@ import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DemandRepository;
+import schwartz.spring.app.repository.DynamicQueryBuilder;
 import schwartz.spring.auth.domain.user.User;
 import schwartz.spring.auth.repository.user.UserRepository;
 
@@ -23,13 +24,15 @@ public class DemandService {
     private final PublicIdGenerator publicIdGenerator;
     private final DemandRepository demandRepository;
     private final UserRepository userRepository;
-    private final jakarta.servlet.Filter filter;
+    private final Filter filter;
+    private final DynamicQueryBuilder DB;
 
-    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, jakarta.servlet.Filter filter) {
+    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, Filter filter, DynamicQueryBuilder db) {
         this.publicIdGenerator = publicIdGenerator;
         this.demandRepository = demandRepository;
         this.userRepository = userRepository;
         this.filter = filter;
+        DB = db;
     }
 
     @Transactional
@@ -139,17 +142,21 @@ public class DemandService {
             return demandRepository.findAll();
         }
         Filter createTimeFilter = request.filters().stream().filter(f -> f.property().equals("create_time")).findFirst().orElse(null);
+        Filter startedTimeFilter = request.filters().stream().filter(f -> f.property().equals("started_time")).findFirst().orElse(null);
+        Filter stoppedTimeFilter = request.filters().stream().filter(f -> f.property().equals("stopped_time")).findFirst().orElse(null);
+        Filter finishedTimeFilter = request.filters().stream().filter(f -> f.property().equals("finished_time")).findFirst().orElse(null);
+
         Specification<Demand> spec = Specification.where((root, query, cb) -> cb.conjunction());
         if (!Utils.isEmpty(request.public_code())) {
             spec = spec.and(((root, query, cb) ->
-                            cb.equal(root.get("public_code"), request.public_code())
+                            cb.like(root.get("public_code"), request.public_code())
                     )
             );
         }
 
-        if (!Utils.isEmpty(request.tile())) {
+        if (!Utils.isEmpty(request.title())) {
             spec = spec.and(((root, query, cb) ->
-                    cb.like(root.get("title"), request.tile()))
+                    cb.like(root.get("title"), request.title()))
             );
 
         }
@@ -161,61 +168,6 @@ public class DemandService {
 
         }
 
-        if (!Utils.isEmpty(createTimeFilter)) {
-
-            if (!Utils.isEmpty(createTimeFilter.operator())) {
-                Instant value;
-                Instant lowerValue;
-                if (createTimeFilter.values().size() == 2) {
-                    lowerValue = Instant.parse(
-                            createTimeFilter.values().getFirst()
-                    );
-                } else {
-                    lowerValue = null;
-                }
-                value = Instant.parse(
-                        createTimeFilter.values().get(1)
-                );
-                switch (createTimeFilter.operator()) {
-                    case GREATER_THAN_OR_EQUAL -> {
-                        spec = spec.and(((root, query, cb) ->
-                                cb.greaterThanOrEqualTo(root.get("create_time"), value))
-                        );
-                    }
-                    case GREATER_THAN -> {
-                        spec = spec.and(((root, query, cb) ->
-                                cb.greaterThan(root.get("create_time"), value))
-                        );
-                    }
-                    case LESS_THAN_OR_EQUAL -> {
-                        spec = spec.and(((root, query, cb) ->
-                                cb.lessThanOrEqualTo(root.get("create_time"), value))
-                        );
-                    }
-                    case LESS_THAN -> {
-                        spec = spec.and(((root, query, cb) ->
-                                cb.lessThan(root.get("create_time"), value))
-                        );
-                    }
-                    case EQUALS -> {
-                        spec = spec.and(((root, query, cb) ->
-                                cb.equal(root.get("create_time"), value))
-                        );
-                    }
-                    case BETWEEN -> {
-                        if (Utils.isEmpty(lowerValue)) {
-                            // TODO RETORNAR ERRO
-                        }
-                        spec = spec.and(((root, query, cb) ->
-                                cb.between(root.get("create_time"), lowerValue, value))
-                        );
-                    }
-                }
-            }
-
-
-        }
-
         if (!Utils.isEmpty(request.status())) {
             spec = spec.and(((root, query, cb) ->
                     cb.equal(root.get("demand_status"), request.status()))
@@ -223,31 +175,23 @@ public class DemandService {
 
         }
 
-        if (!Utils.isEmpty()) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.equal())
-            );
+        if (!Utils.isEmpty(createTimeFilter)) {
+            spec = DB.dateTimeQuery(filter, "create_time", spec);
+        }
+
+
+        if (!Utils.isEmpty(startedTimeFilter)) {
+            spec = DB.dateTimeQuery(filter, "started_time", spec);
 
         }
 
-        if (!Utils.isEmpty()) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.equal())
-            );
+        if (!Utils.isEmpty(stoppedTimeFilter)) {
+            spec = DB.dateTimeQuery(filter, "stopped_time", spec);
 
         }
 
-        if (!Utils.isEmpty()) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.equal())
-            );
-
-        }
-
-        if (!Utils.isEmpty()) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.equal())
-            );
+        if (!Utils.isEmpty(finishedTimeFilter)) {
+            spec = DB.dateTimeQuery(filter, "finished_time", spec);
 
         }
         return demandRepository.findAll(spec);
