@@ -10,8 +10,8 @@ import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DemandRepository;
 import schwartz.spring.app.repository.DynamicQueryBuilder;
-import schwartz.spring.auth.domain.user.User;
-import schwartz.spring.auth.repository.user.UserRepository;
+import schwartz.spring.app.domain.user.User;
+import schwartz.spring.app.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -24,14 +24,13 @@ public class DemandService {
     private final PublicIdGenerator publicIdGenerator;
     private final DemandRepository demandRepository;
     private final UserRepository userRepository;
-    private final Filter filter;
     private final DynamicQueryBuilder DB;
 
-    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, Filter filter, DynamicQueryBuilder db) {
+    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository,
+                         UserRepository userRepository, DynamicQueryBuilder db) {
         this.publicIdGenerator = publicIdGenerator;
         this.demandRepository = demandRepository;
         this.userRepository = userRepository;
-        this.filter = filter;
         DB = db;
     }
 
@@ -160,11 +159,14 @@ public class DemandService {
             );
 
         }
-
         if (!Utils.isEmpty(request.user())) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.equal(root.get("user_id"), request.user()))
-            );
+            User user = userRepository.findByLogin(request.user());
+            if (!Utils.isEmpty(user)) {
+
+                spec = spec.and(((root, query, cb) ->
+                        cb.equal(root.get("user_id"), user.getPublicId()))
+                );
+            }
 
         }
 
@@ -176,22 +178,22 @@ public class DemandService {
         }
 
         if (!Utils.isEmpty(createTimeFilter)) {
-            spec = DB.dateTimeQuery(filter, "create_time", spec);
+            spec = DB.dateTimeQuery(createTimeFilter, "create_time", spec);
         }
 
 
         if (!Utils.isEmpty(startedTimeFilter)) {
-            spec = DB.dateTimeQuery(filter, "started_time", spec);
+            spec = DB.dateTimeQuery(startedTimeFilter, "started_time", spec);
 
         }
 
         if (!Utils.isEmpty(stoppedTimeFilter)) {
-            spec = DB.dateTimeQuery(filter, "stopped_time", spec);
+            spec = DB.dateTimeQuery(stoppedTimeFilter, "stopped_time", spec);
 
         }
 
         if (!Utils.isEmpty(finishedTimeFilter)) {
-            spec = DB.dateTimeQuery(filter, "finished_time", spec);
+            spec = DB.dateTimeQuery(finishedTimeFilter, "finished_time", spec);
 
         }
         return demandRepository.findAll(spec);

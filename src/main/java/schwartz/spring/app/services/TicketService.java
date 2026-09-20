@@ -16,9 +16,8 @@ import schwartz.spring.app.domain.ticket.TicketUpdateRequest;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.ClientRepository;
 import schwartz.spring.app.repository.TicketRepository;
-import schwartz.spring.auth.domain.user.User;
-import schwartz.spring.auth.domain.user.UserRole;
-import schwartz.spring.auth.services.UserService;
+import schwartz.spring.app.domain.user.User;
+import schwartz.spring.app.domain.user.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.*;

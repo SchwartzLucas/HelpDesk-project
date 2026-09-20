@@ -1,4 +1,4 @@
-package schwartz.spring.auth.controller;
+package schwartz.spring.app.auth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,9 +8,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import schwartz.spring.auth.domain.user.*;
-import schwartz.spring.auth.services.TokenService;
-import schwartz.spring.auth.repository.user.UserRepository;
+import schwartz.spring.app.domain.user.AuthenticationRequest;
+import schwartz.spring.app.domain.user.LoginResponse;
+import schwartz.spring.app.domain.user.RegisterRequest;
+import schwartz.spring.app.domain.user.User;
+import schwartz.spring.app.auth.services.TokenService;
+import schwartz.spring.app.repository.UserRepository;
 
 import java.util.Objects;
 

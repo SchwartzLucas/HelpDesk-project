@@ -19,7 +19,7 @@ public record DemandCreateResponse(
                 demand.getPublicCode(),
                 demand.getTitle(),
                 demand.getDescription(),
-                demand.getUserName() ,
+                demand.getUser_name() ,
                 demand.getCreateTime(),
                 demand.getDemandStatus()
         );

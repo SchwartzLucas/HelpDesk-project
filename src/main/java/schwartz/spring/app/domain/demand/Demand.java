@@ -69,9 +69,6 @@ public class Demand {
     @Column(name = "finish_time")
     private Instant finishTime;
     @Size(max = 100)
-    @ToString.Exclude
-    @Column(name = "user_name", length = 100)
-    private String userName;
     @NotNull
     @ToString.Exclude
     @Column(name = "demand_status", nullable = false)
@@ -79,6 +76,7 @@ public class Demand {
     @ToString.Exclude
     @Column(name = "started_time")
     private Instant startedTime;
+    private String user_name;
 
 
     @Transient

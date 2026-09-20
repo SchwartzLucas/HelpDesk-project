@@ -1,4 +1,4 @@
-package schwartz.spring.auth.services;
+package schwartz.spring.app.auth.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -7,7 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import schwartz.spring.Utils.TimeConfiguration;
-import schwartz.spring.auth.domain.user.User;
+import schwartz.spring.app.domain.user.User;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

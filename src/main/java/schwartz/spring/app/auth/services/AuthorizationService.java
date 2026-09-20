@@ -1,4 +1,4 @@
-package schwartz.spring.auth.services;
+package schwartz.spring.app.auth.services;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import schwartz.spring.auth.domain.user.User;
-import schwartz.spring.auth.repository.user.UserRepository;
+import schwartz.spring.app.domain.user.User;
+import schwartz.spring.app.repository.UserRepository;
 
 // @ service -> dizer para o Spring que é um serviço
 @Service

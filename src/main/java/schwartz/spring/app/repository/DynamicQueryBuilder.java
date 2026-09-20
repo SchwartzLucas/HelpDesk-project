@@ -1,10 +1,13 @@
 package schwartz.spring.app.repository;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 import schwartz.spring.Utils.Filter;
 import schwartz.spring.Utils.Utils;
 import java.time.Instant;
 
+@Component
 public class DynamicQueryBuilder {
 
     public <T> Specification<T> dateTimeQuery(

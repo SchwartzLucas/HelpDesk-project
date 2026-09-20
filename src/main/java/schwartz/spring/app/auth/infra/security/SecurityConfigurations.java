@@ -1,4 +1,4 @@
-package schwartz.spring.auth.infra.security;
+package schwartz.spring.app.auth.infra.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

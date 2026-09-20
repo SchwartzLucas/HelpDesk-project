@@ -1,4 +1,4 @@
-package schwartz.spring.auth.domain.user;
+package schwartz.spring.app.domain.user;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

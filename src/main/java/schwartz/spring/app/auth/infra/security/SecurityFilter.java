@@ -1,4 +1,4 @@
-package schwartz.spring.auth.infra.security;
+package schwartz.spring.app.auth.infra.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,8 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import schwartz.spring.auth.repository.user.UserRepository;
-import schwartz.spring.auth.services.TokenService;
+import schwartz.spring.app.repository.UserRepository;
+import schwartz.spring.app.auth.services.TokenService;
 
 import java.io.IOException;
 
