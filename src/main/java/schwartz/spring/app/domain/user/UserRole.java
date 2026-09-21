@@ -9,9 +9,11 @@ public enum UserRole {
     COMMON_USER("common user", 3);
 
     private final String role;
+    private final Integer IntegerRole;
 
-    UserRole(String role, int i) {
+    UserRole(String role, Integer integerRole) {
         this.role = role;
+        this.IntegerRole = integerRole;
     }
 
 }

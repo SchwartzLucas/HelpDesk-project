@@ -8,28 +8,34 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import schwartz.spring.app.domain.user.AuthenticationRequest;
-import schwartz.spring.app.domain.user.LoginResponse;
-import schwartz.spring.app.domain.user.RegisterRequest;
-import schwartz.spring.app.domain.user.User;
+import schwartz.spring.Utils.Utils;
+import schwartz.spring.app.domain.user.*;
 import schwartz.spring.app.auth.services.TokenService;
 import schwartz.spring.app.repository.UserRepository;
+import schwartz.spring.app.services.UserService;
 
 import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth")
-public class AuthenticatorController{
+public class AuthenticatorController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    private TokenService tokenService;
+
+    private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
+    private final UserService userService;
+
+
+    public AuthenticatorController(AuthenticationManager authenticationManager, UserRepository userRepository,
+                                   TokenService tokenService, UserService userService) {
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
+        this.userService = userService;
+    }
+
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Validated AuthenticationRequest request){
+    public ResponseEntity login(@RequestBody @Validated AuthenticationRequest request) {
 
         var userNamePassword = new UsernamePasswordAuthenticationToken(request.login(), request.password());
         try {
@@ -42,15 +48,12 @@ public class AuthenticatorController{
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody @Validated RegisterRequest data){
-        if(this.userRepository.findByLogin(data.login()) != null) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<UserRegisterResponse> register(@RequestBody @Validated UserRegisterRequest request) {
+        User user = userService.register(request);
+        if(Utils.isEmpty(user)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        User newUser = new User(data.login(), encryptedPassword, data.role());
-
-        this.userRepository.save(newUser);
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(UserRegisterResponse.from(user));
     }
 }

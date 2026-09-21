@@ -49,7 +49,7 @@ public class TicketService {
 
     public Ticket create(TicketCreateRequest request) {
         User user = userService.getAuthenticatedUser();
-        Client client = clientRepository.findClientById(user.getClient_id());
+        Client client = clientRepository.findClientByPublicId((user.getClientId()));
         String title = request.title();
         String description = request.description();
         Integer category = request.category();
@@ -187,7 +187,7 @@ public class TicketService {
                     params.put("client_id", request.client_id());
                 } else {
                     conditions.add("t.client_id = :client_id");
-                    params.put("client_id", user.getClient_id());
+                    params.put("client_id", user.getClientId());
                 }
             }
 
@@ -220,6 +220,7 @@ public class TicketService {
             List<Ticket> resultados = query.getResultList();
             return resultados;
         }
-        return ticketRepository.listAllByClient_id(user.getClient_id());
+        Client client = clientRepository.findClientByPublicId(user.getClientId());
+        return ticketRepository.listAllByClienteId(client.getId());
     }
 }

@@ -13,6 +13,7 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import schwartz.spring.Utils.Utils;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,17 +40,18 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.ORDINAL)
     private UserRole role;
-    @Column(name = "team_id")
-    private Long teamId;
     @NotNull
     @ColumnDefault("1")
     @Column(name = "is_active", nullable = false)
     private Byte isActive;
-    @Column(name = "client_id")
-    private Long client_id;
+    @ColumnDefault("(UUID_TO_BIN(UUID()))")
+    @Column(name = "client_id", length = 16)
+    private UUID clientId;
+    @ColumnDefault("(UUID_TO_BIN(UUID()))")
+    @Column(name = "team_id", length = 16)
+    private UUID teamId;
     @Size(max = 30)
-    @NotNull
-    @Column(name = "public_code", nullable = false, length = 30)
+    @Column(name = "public_code", length = 30)
     private String publicCode;
     @JdbcTypeCode(SqlTypes.BINARY)
     @NotNull
@@ -58,10 +60,12 @@ public class User implements UserDetails {
     private UUID publicId;
 
 
-    public User(String login, String encryptedPassword, UserRole role) {
+    public User(String login, String encryptedPassword, UserRole role, UUID publicId) {
+        this.publicId = publicId;
         this.login = login;
         this.password = encryptedPassword;
         this.role = role;
+        this.isActive = 1;
     }
 
     @Override

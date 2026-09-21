@@ -18,7 +18,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @NoArgsConstructor
-@Entity
+@Entity(name = "demand")
 @Table(name = "demand")
 public class Demand {
     @Id

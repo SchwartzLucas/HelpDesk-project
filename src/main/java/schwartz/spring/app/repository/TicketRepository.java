@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Ticket findByPublicId(UUID publicId);
-
+    // TODO REFAZER DEPOIS
     @Query("select t from ticket t where t.clientId = :id")
-    List<Ticket> listAllByClient_id(@Param("id") Long id);
+    List<Ticket> listAllByClienteId(@Param("id") Long id);
 }

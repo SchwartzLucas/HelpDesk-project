@@ -1,15 +1,12 @@
 package schwartz.spring.app.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import schwartz.spring.app.domain.user.User;
-import schwartz.spring.app.domain.user.UserListRequest;
+import org.springframework.security.core.parameters.P;
+import org.springframework.web.bind.annotation.*;
+import schwartz.spring.app.domain.user.*;
 import schwartz.spring.app.services.UserService;
-import schwartz.spring.app.domain.user.UserListResponse;
 
 import java.util.List;
 
@@ -28,5 +25,12 @@ public class UserController {
         List<User> user = userService.list(request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(UserListResponse.from(user));
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<UserUpdateResponse> update(@RequestBody(required = false) UserUpdateRequest request) {
+        userService.update();
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(null);
     }
 }

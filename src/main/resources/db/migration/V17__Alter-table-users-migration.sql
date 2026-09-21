@@ -1,12 +1,8 @@
 alter table  users
     add column create_time DATETIME not null default (now());
 
--- 1. Remover a FK antiga
 ALTER TABLE users
-    DROP FOREIGN KEY fk_users_client_public_id;
-
-ALTER TABLE team
-    ADD UNIQUE KEY uk_team_public_id (public_id);
+    DROP FOREIGN KEY fk_users_team;
 
 alter table users
     modify  column team_id BINARY(16) null default (uuid_to_bin(uuid()));

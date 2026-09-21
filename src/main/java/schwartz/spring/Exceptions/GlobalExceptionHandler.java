@@ -15,7 +15,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    //private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ClientAlreadyExistsException.class)
     public ProblemDetail handleClientAlreadyExists(
@@ -62,7 +62,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUnexpected(
             Exception exception
     ) {
-        log.error("Exceção lançada: {}", (Object) exception.getStackTrace());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", 500);
         body.put("error", "INTERNAL_SERVER_ERROR");
