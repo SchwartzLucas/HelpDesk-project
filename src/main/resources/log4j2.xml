@@ -6,22 +6,15 @@
         </Console>
     </Appenders>
     <Loggers>
-        <!-- Logger da SUA aplicação - nível mais detalhado -->
         <Logger name="schwartz.spring" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
-
-        <!-- Spring Framework - só warnings e erros -->
         <Logger name="org.springframework" level="WARN" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
-
-        <!-- Hibernate - só warnings e erros -->
         <Logger name="org.hibernate" level="WARN" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
-
-        <!-- Root logger - nível conservador -->
         <Root level="INFO">
             <AppenderRef ref="Console"/>
         </Root>

@@ -1,14 +1,15 @@
 package schwartz.spring.app.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.user.*;
 import schwartz.spring.app.services.UserService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -27,9 +28,13 @@ public class UserController {
                 .body(UserListResponse.from(user));
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<UserUpdateResponse> update(@RequestBody(required = false) UserUpdateRequest request) {
-        userService.update();
+    @PostMapping("/update/{user}")
+    public ResponseEntity<UserUpdateResponse> update(@PathVariable("user") UUID user_public_id, @RequestBody @Validated UserUpdateRequest request) {
+       User user = userService.update(user_public_id, request);
+       if(Utils.isEmpty(user)){
+           return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                   .body(null);
+       }
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(null);
     }

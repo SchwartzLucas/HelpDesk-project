@@ -1,8 +1,11 @@
 package schwartz.spring.app.domain.demand;
 
+import lombok.Getter;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public enum DemandStatus {
     CREATED(0),
     ACTIVE(1),
@@ -15,10 +18,6 @@ public enum DemandStatus {
 
     DemandStatus(int code) {
         this.code = code;
-    }
-
-    public int getCode() {
-        return code;
     }
 
     private static final Map<Integer, DemandStatus> BY_CODE = new HashMap<>();

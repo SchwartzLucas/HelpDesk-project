@@ -13,7 +13,6 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import schwartz.spring.Utils.Utils;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +42,7 @@ public class User implements UserDetails {
     @NotNull
     @ColumnDefault("1")
     @Column(name = "is_active", nullable = false)
-    private Byte isActive;
+    private Integer isActive;
     @ColumnDefault("(UUID_TO_BIN(UUID()))")
     @Column(name = "client_id", length = 16)
     private UUID clientId;
@@ -84,7 +83,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return login;
+        return this.login;
     }
 
     @Override
@@ -104,7 +103,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        Byte one = 1;
-        return one.equals(this.isActive);
+        return 1 == this.isActive;
     }
 }

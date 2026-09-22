@@ -22,6 +22,7 @@ import java.util.UUID;
 @Table(name = "demand")
 public class Demand {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
     @JdbcTypeCode(SqlTypes.BINARY)
@@ -76,6 +77,7 @@ public class Demand {
     @ToString.Exclude
     @Column(name = "started_time")
     private Instant startedTime;
+    @Transient
     private String user_name;
 
 

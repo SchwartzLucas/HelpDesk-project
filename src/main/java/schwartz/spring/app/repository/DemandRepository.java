@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DemandRepository extends JpaRepository<Demand, Long>, JpaSpecificationExecutor<Demand> {
-    @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM Demand d WHERE d.userId = :publicId) THEN MAX(d.userDemandId) ELSE 0 END FROM Demand d WHERE d.userId = :publicId")
+    @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM demand d WHERE d.userId = :publicId) THEN MAX(d.userDemandId) ELSE 0 END FROM demand d WHERE d.userId = :publicId")
     Long findMaxUserDemandID(UUID publicId);
 
     Demand findByPublicId(UUID publicId);
