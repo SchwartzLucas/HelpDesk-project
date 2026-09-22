@@ -141,7 +141,13 @@ public class DemandService {
 
     public List<Demand> list(DemandListRequest request) {
         if (Utils.isEmpty(request)) {
-            return demandRepository.findAll();
+            List<Demand> demands = demandRepository.findAll();
+            for(Demand demand : demands){
+                User user = userRepository.findByPublicId(demand.getUserId());
+                demand.setUser_name(user.getLogin());
+            }
+            return demands;
+
         }
         Filter createTimeFilter = request.filters().stream().filter(f -> f.property().equals("create_time")).findFirst().orElse(null);
         Filter startedTimeFilter = request.filters().stream().filter(f -> f.property().equals("started_time")).findFirst().orElse(null);

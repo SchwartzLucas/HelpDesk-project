@@ -1,6 +1,7 @@
-import {Component, Input} from '@angular/core';
+import {Component, inject, Input} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {HttpClient} from '@angular/common/http';
+import {Router} from '@angular/router';
 
 @Component({
   imports: [FormsModule],
@@ -13,6 +14,9 @@ export class DefultLoginLayout {
   @Input() primaryBtnText: string = 'Sign in';
   @Input() secondaryBtnText: string = 'Create account';
 
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
   loginData = {
     login: '',
     password: ''
@@ -21,7 +25,6 @@ export class DefultLoginLayout {
   loading = false;
   errorMessage = '';
 
-  constructor(private http: HttpClient) {}
 
   onLogin() {
     this.loading = true;
@@ -32,6 +35,7 @@ export class DefultLoginLayout {
         next: (response: any) => {
           localStorage.setItem('token', response.token);
           console.log('Login realizado com sucesso!');
+          this.router.navigate(["/demands"])
         },
         error: (error) => {
           this.errorMessage = 'Login ou senha inválidos';

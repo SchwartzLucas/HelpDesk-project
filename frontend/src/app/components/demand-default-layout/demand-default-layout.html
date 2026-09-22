@@ -1,0 +1,32 @@
+<div>
+  Total de demandas: {{ demands.length }}
+</div>
+
+@if (demands.length === 0) {
+  <div>Nenhuma demanda encontrada.</div>
+} @else {
+  <table>
+    <thead>
+    <tr>
+      <th>Código</th>
+      <th>Título</th>
+      <th>Usuário</th>
+      <th>Status</th>
+      <th>Criado</th>
+      <th>Tempo gasto</th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (d of demands; track $index) {
+        <tr>
+          <td>{{ d.public_code }}</td>
+          <td>{{ d.title }}</td>
+          <td>{{ d.user_name ?? 'Nenhum usuário atribuido' }}</td>
+          <td>{{ d.demand_status_code ?? '-' }}</td>
+          <td>{{ d.create_time | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ calcularTempoGasto(d) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
