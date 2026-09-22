@@ -3,11 +3,13 @@ package schwartz.spring.app.services;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import schwartz.spring.Exceptions.LoginException;
 import schwartz.spring.Utils.Filter;
 import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.auth.services.TokenService;
@@ -15,7 +17,6 @@ import schwartz.spring.app.domain.user.*;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DynamicQueryBuilder;
 import schwartz.spring.app.repository.UserRepository;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -139,8 +140,13 @@ public class UserService {
     }
 
     public String login(AuthenticationRequest request) {
-        var userNamePassword = new UsernamePasswordAuthenticationToken(request.login(), request.password());
-        var auth = this.authenticationManager.authenticate(userNamePassword);
-        return tokenService.generateToken((User) auth.getPrincipal());
+        try {
+            var userNamePassword = new UsernamePasswordAuthenticationToken(request.login(), request.password());
+            var auth = this.authenticationManager.authenticate(userNamePassword);
+            return tokenService.generateToken((User) auth.getPrincipal());
+        } catch (BadCredentialsException e) {
+            throw new LoginException("Login ou senha inválidos");
+        }
+
     }
 }

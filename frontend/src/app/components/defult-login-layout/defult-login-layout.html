@@ -1,17 +1,50 @@
 <main>
   <section class="form-section">
-    <img/>
+    <img src="../../assets/logo.svg" alt="Logo"/>
     <h2>{{ title }}</h2>
-    <div class="btn-wrapper">
-      <button class="btn-primary">{{ primaryBtnText }}</button>
-      <div>
-        <span>or</span>
+
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+      <div class="input-group">
+        <label for="login">Login</label>
+        <input
+          type="text"
+          id="login"
+          name="login"
+          [(ngModel)]="loginData.login"
+          required
+          placeholder="Seu login"
+        />
       </div>
-      <button class="btn-secondary">{{ secondaryBtnText }}</button>
-    </div>
+
+      <div class="input-group">
+        <label for="password">Senha</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="loginData.password"
+          required
+          placeholder="Sua senha"
+        />
+      </div>
+      <div class="btn-wrapper">
+        <button class="btn-primary" type="submit" [disabled]="loginForm.invalid || loading">
+          {{ loading ? 'Entrando...' : primaryBtnText }}
+        </button>
+
+        @if (errorMessage) {
+          <div class="error-message">{{ errorMessage }}</div>
+        }
+        <div>
+          <span>or</span>
+        </div>
+        <button class="btn-secondary">{{ secondaryBtnText }}</button>
+      </div>
+    </form>
   </section>
+
   <section class="main-section">
     <h1>Can we help you?</h1>
-    <img/>
+    <img src="../../assets/illustration.svg" alt="Illustration"/>
   </section>
 </main>
