@@ -21,7 +21,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<List<UserListResponse>> list(@RequestBody(required = false) UserListRequest request) {
         List<User> user = userService.list(request);
         return ResponseEntity.status(HttpStatus.OK)

@@ -24,15 +24,12 @@ public class Demand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
     @JdbcTypeCode(SqlTypes.BINARY)
-    @NotNull
     @ColumnDefault("(UUID_TO_BIN(UUID()))")
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private UUID userId;
-    @NotNull
     @ToString.Exclude
-    @Column(name = "user_demand_id", nullable = false)
+    @Column(name = "user_demand_id")
     private Long userDemandId;
     @Size(max = 30)
     @ToString.Exclude

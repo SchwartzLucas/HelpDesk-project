@@ -36,24 +36,31 @@ public class DemandService {
 
     @Transactional
     public Demand create(DemandCreateRequest request) {
-        User user = userRepository.findByPublicId(request.user_id());
-        Long user_demand_id = demandRepository.findMaxUserDemandID(user.getPublicId());
+        UUID user_public_id = null;
+        Long user_demand_id = null;
+        String user_name = null;
+        if (!Utils.isEmpty(request.user_id())) {
+            User user = userRepository.findByPublicId(request.user_id());
+            user_public_id = user.getPublicId();
+            user_name = user.getLogin();
+            user_demand_id = demandRepository.findMaxUserDemandID(user.getPublicId()) + 1;
+        }
         Instant now = Instant.now();
         Demand demand = new Demand();
         demand.setPublicId(publicIdGenerator.generate());
         demand.setTitle(request.title());
         demand.setDescription(request.description());
-        demand.setUserId(user.getPublicId());
-        demand.setUserDemandId(user_demand_id + 1);
         demand.setDemandStatus(DemandStatus.CREATED);
         demand.setCreateTime(now);
+        demand.setUserId(user_public_id);
+        demand.setUserDemandId(user_demand_id);
+        demand.setUser_name(user_name);
         demandRepository.saveAndFlush(demand);
         demand.setPublicCode(String.format(
                         "DEM-%08d", demand.getUserDemandId()
                 )
         );
         demandRepository.save(demand);
-        demand.setUser_name(user.getLogin());
         return demand;
     }
 
@@ -142,7 +149,10 @@ public class DemandService {
     public List<Demand> list(DemandListRequest request) {
         if (Utils.isEmpty(request)) {
             List<Demand> demands = demandRepository.findAll();
-            for(Demand demand : demands){
+            for (Demand demand : demands) {
+                if(Utils.isEmpty(demand.getUserId())){
+                    continue;
+                }
                 User user = userRepository.findByPublicId(demand.getUserId());
                 demand.setUser_name(user.getLogin());
             }
