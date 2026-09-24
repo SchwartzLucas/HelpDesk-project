@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { Login } from './pages/login/login';
-import {Demand} from './pages/demand/demand';
+import { DemandCreateLayout } from './components/demands/demand-create-layout/demand-create-layout';
+import { DemandEditLayout } from './components/demands/demand-edit-layout/demand-edit-layout';
+import { DemandListLayoutComponent } from './components/demands/demand-list-layout/demand-list-layout';
 
 export const routes: Routes = [
   {
@@ -14,8 +16,22 @@ export const routes: Routes = [
   },
   {
     path: 'demands',
-    component: Demand
+    children: [
+      {
+        path: '',
+        component: DemandListLayoutComponent
+      },
+      {
+        path: 'create',
+        component: DemandCreateLayout
+      },
+      {
+        path: `:publicId`,
+        component: DemandEditLayout
+      },
+    ]
   },
+
   {
     path: '**',
     redirectTo: 'login'

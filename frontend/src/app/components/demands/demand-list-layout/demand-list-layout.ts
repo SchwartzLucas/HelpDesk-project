@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {DatePipe} from '@angular/common';
 import {ChangeDetectorRef} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
 
 export interface Demand {
   create_time: string;
@@ -20,72 +21,20 @@ export interface Demand {
   demand_status_code?: number;
 }
 
-export interface User {
-  user_id: string;
-  user_name: string;
-}
-
 @Component({
-  selector: 'app-demand-default-layout',
+  selector: 'app-demand-list-layout',
   standalone: true,
   imports: [DatePipe, FormsModule],
-  styleUrl: './demand-default-layout.scss',
-  templateUrl: './demand-default-layout.html',
+  styleUrl: './demand-list-layout.scss',
+  templateUrl: './demand-list-layout.html',
 })
-export class DemandDefaultLayoutComponent {
+export class DemandListLayoutComponent {
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef)
+  private router = inject(Router)
   demands: Demand[] = [];
-  users: User[] = [];
-  carregandoUsuarios = false;
-  usuariosCarregados = false;
-
-  showCreateWindow: boolean = false;
-  newDemand = {
-    title: '', description: '', user_id: null as string | null, demand_status_code: ''
-  };
-
   constructor() {
-    console.log('🔥 DemandDefaultLayout CRIADO');
-
     this.carregarDemandas();
-  }
-
-  abrirJanelaCriar(): void {
-    this.newDemand = {
-      title: '', description: '', user_id: '', demand_status_code: ''
-    };
-
-    this.showCreateWindow = true;
-  }
-
-  fecharJanelaCriar(): void {
-    this.showCreateWindow = false;
-  }
-
-  criarDemanda(): void {
-
-    if (!this.newDemand.title.trim()) {
-      return;
-    }
-
-    const demanda = {
-      title: this.newDemand.title, description: this.newDemand.description, user_id: this.newDemand.user_id,
-      demand_status_code: this.newDemand.demand_status_code
-    };
-
-    this.http
-      .post('http://localhost:8080/demand/create', demanda)
-      .subscribe({
-        next: (response) => {
-          console.log('Demanda criada:', response);
-
-          this.fecharJanelaCriar();
-          this.carregarDemandas();
-        }, error: (err) => {
-          console.error('Erro ao criar demanda:', err);
-        }
-      });
   }
 
   carregarDemandas(): void {
@@ -103,33 +52,6 @@ export class DemandDefaultLayoutComponent {
         }, error: (err) => {
           console.error('Erro ao carregar demandas:', err);
         },
-      });
-  }
-
-  carregarUsuarios(): void {
-    if (this.usuariosCarregados || this.carregandoUsuarios) {
-      return;
-    }
-    this.carregandoUsuarios = true;
-    this.http
-      .post<User[]>('http://localhost:8080/user/list', {
-        is_active: 1
-      })
-      .subscribe({
-        next: (dados) => {
-          console.log('Usuários recebidos:', dados);
-
-          this.users = dados;
-          this.usuariosCarregados = true;
-          this.carregandoUsuarios = false;
-
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Erro ao carregar usuários:', err);
-
-          this.carregandoUsuarios = false;
-        }
       });
   }
 
@@ -163,6 +85,14 @@ export class DemandDefaultLayoutComponent {
     parts.push(`${seconds}s`);
 
     return parts.join(' ');
+  }
+
+  abrirJanelaCriar(): void {
+    this.router.navigate(["/demands/create"]);
+  }
+
+  abrirDemanda(publicId: string): void {
+    this.router.navigate(["/demands", publicId])
   }
 
 }

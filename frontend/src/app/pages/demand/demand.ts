@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { DemandDefaultLayoutComponent } from '../../components/demand-default-layout/demand-default-layout';
+import { DemandListLayoutComponent } from '../../components/demands/demand-list-layout/demand-list-layout';
 
 @Component({
   imports: [
-    DemandDefaultLayoutComponent
+    DemandListLayoutComponent
   ],
   selector: 'app-demand',
   styleUrl: './demand.scss',

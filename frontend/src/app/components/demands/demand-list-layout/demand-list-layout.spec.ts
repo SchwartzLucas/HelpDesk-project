@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DemandDefaultLayout } from './demand-default-layout';
+import { DemandDefaultLayout } from './demand-list-layout';
 
 describe('DemandDefaultLayout', () => {
   let component: DemandDefaultLayout;
