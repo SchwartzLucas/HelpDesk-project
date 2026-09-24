@@ -1,1 +1,31 @@
-<p>demand-edit-layout works!</p>
+@if (demand) {
+
+  <h1>Editar demanda {{ demand.public_code }}</h1>
+
+  <div>
+    <label>Título</label>
+
+    <input
+      type="text"
+      [(ngModel)]="demand.title"
+    >
+  </div>
+
+  <div>
+    <label>Descrição</label>
+
+    <textarea
+      [(ngModel)]="demand.description"
+    ></textarea>
+  </div>
+
+  <div>
+    <label>Status</label>
+
+    <input
+      type="text"
+      [(ngModel)]="demand.demand_status_code"
+    >
+  </div>
+
+}

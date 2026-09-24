@@ -34,7 +34,7 @@
         @for (d of demands; track d.public_id) {
 
           <tr
-            (click)="abrirDemanda(d.public_id)"
+            (click)="editarDemanda(d.public_id)"
             class="linha-demanda"
           >
             <td>{{ d.public_code }}</td>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {DefultLoginLayout} from '../../components/defult-login-layout/defult-login-layout';
+import {DefultLoginLayout} from '../../components/login/defult-login-layout/defult-login-layout';
 
 
 @Component({

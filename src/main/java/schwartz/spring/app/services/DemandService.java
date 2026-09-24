@@ -4,6 +4,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import schwartz.spring.Exceptions.InvalidDemandException;
 import schwartz.spring.Utils.Filter;
 import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
@@ -150,7 +151,7 @@ public class DemandService {
         if (Utils.isEmpty(request)) {
             List<Demand> demands = demandRepository.findAll();
             for (Demand demand : demands) {
-                if(Utils.isEmpty(demand.getUserId())){
+                if (Utils.isEmpty(demand.getUserId())) {
                     continue;
                 }
                 User user = userRepository.findByPublicId(demand.getUserId());
@@ -216,5 +217,16 @@ public class DemandService {
 
         }
         return demandRepository.findAll(spec);
+    }
+
+    public Demand listByPublicId(UUID publicId) throws InvalidDemandException {
+        if (Utils.isEmpty(publicId)) {
+            throw new InvalidDemandException("Invalid PublicId");
+        }
+        Demand demand = demandRepository.findByPublicId(publicId);
+        if (Utils.isEmpty(demand)) {
+            throw new InvalidDemandException("Demand not exists anymore");
+        }
+        return demand;
     }
 }

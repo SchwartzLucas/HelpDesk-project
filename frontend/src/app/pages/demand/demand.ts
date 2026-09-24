@@ -11,4 +11,5 @@ import { DemandListLayoutComponent } from '../../components/demands/demand-list-
 })
 
 
-export class Demand {}
+export class Demand {
+}

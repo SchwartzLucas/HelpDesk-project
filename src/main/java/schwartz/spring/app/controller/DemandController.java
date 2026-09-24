@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import schwartz.spring.Exceptions.InvalidDemandException;
 import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.services.DemandService;
@@ -41,9 +42,19 @@ public class DemandController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<DemandListResponse>> list(@RequestBody(required = false) DemandListRequest request) {
+    public ResponseEntity<List<DemandListResponse>> list( @RequestBody(required = false) DemandListRequest request) {
         List<Demand> demand = demandService.list(request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(DemandListResponse.from(demand));
+    }
+
+    @GetMapping("/{publicId}")
+    public ResponseEntity<DemandListByPublicIdResponse> listByPublicId(@PathVariable UUID publicId) throws InvalidDemandException {
+
+        Demand demand = demandService.listByPublicId(publicId);
+
+        return ResponseEntity.ok(
+                DemandListByPublicIdResponse.from(demand)
+        );
     }
 }

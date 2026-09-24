@@ -91,7 +91,7 @@ export class DemandListLayoutComponent {
     this.router.navigate(["/demands/create"]);
   }
 
-  abrirDemanda(publicId: string): void {
+  editarDemanda(publicId: string): void {
     this.router.navigate(["/demands", publicId])
   }
 
