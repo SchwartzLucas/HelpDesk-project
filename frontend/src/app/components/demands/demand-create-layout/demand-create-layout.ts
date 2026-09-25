@@ -2,6 +2,7 @@ import {ChangeDetectorRef, Component, inject} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
+import {UserService} from '../../../services/users/user-service';
 
 export interface User {
   user_id: string;
@@ -19,6 +20,11 @@ export interface User {
   templateUrl: './demand-create-layout.html',
 })
 export class DemandCreateLayout {
+
+  constructor(
+    private userService: UserService
+  ) {
+  }
   private http = inject(HttpClient);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef)
@@ -44,7 +50,6 @@ export class DemandCreateLayout {
       .post('http://localhost:8080/demand/create', demanda)
       .subscribe({
         next: (response) => {
-          console.log('Demanda criada:', response);
           this.router.navigate(["/demands"])
         }, error: (err) => {
           console.error('Erro ao criar demanda:', err);
@@ -57,30 +62,11 @@ export class DemandCreateLayout {
   }
 
   carregarUsuarios(): void {
-    if (this.usuariosCarregados || this.carregandoUsuarios) {
-      return;
-    }
-    this.carregandoUsuarios = true;
-    this.http
-      .post<User[]>('http://localhost:8080/user/list', {
-        is_active: 1
-      })
-      .subscribe({
-        next: (dados) => {
-          console.log('Usuários recebidos:', dados);
-
-          this.users = dados;
-          this.usuariosCarregados = true;
-          this.carregandoUsuarios = false;
-
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Erro ao carregar usuários:', err);
-
-          this.carregandoUsuarios = false;
-        }
-      });
+    this.userService.carregarUsuarios().subscribe({
+      next: (dados) => {
+        this.users = dados;
+      }
+    });
   }
 
 }

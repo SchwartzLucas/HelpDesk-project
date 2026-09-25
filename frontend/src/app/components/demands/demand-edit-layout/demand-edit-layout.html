@@ -1,31 +1,38 @@
 @if (demand) {
+  <input [(ngModel)]="demand.title">
 
-  <h1>Editar demanda {{ demand.public_code }}</h1>
+  <textarea [(ngModel)]="demand.description"></textarea>
 
-  <div>
-    <label>Título</label>
+  <select
+    id="demand_status"
+    [(ngModel)]="demand.status">
 
-    <input
-      type="text"
-      [(ngModel)]="demand.title"
-    >
-  </div>
+    @for (status of statusDisponiveis; track status.value) {
+      <option [ngValue]="status.value">
+        {{ status.name }}
+      </option>
+    }
+  </select>
 
-  <div>
-    <label>Descrição</label>
+  <select
+    id="user"
+    [(ngModel)]="demand.user_id"
+    (click)="carregarUsuarios()">
 
-    <textarea
-      [(ngModel)]="demand.description"
-    ></textarea>
-  </div>
+    <option [ngValue]="null">
+      Nenhum usuário atribuído
+    </option>
 
-  <div>
-    <label>Status</label>
+    @if (carregandoUsuarios) {
+      <option disabled>
+        Carregando usuários...
+      </option>
+    }
 
-    <input
-      type="text"
-      [(ngModel)]="demand.demand_status_code"
-    >
-  </div>
-
+    @for (user of users; track user.user_id) {
+      <option [ngValue]="user.user_id">
+        {{ user.user_name }}
+      </option>
+    }
+  </select>
 }

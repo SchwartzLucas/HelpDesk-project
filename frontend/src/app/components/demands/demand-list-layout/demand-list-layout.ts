@@ -42,13 +42,8 @@ export class DemandListLayoutComponent {
       .get<Demand[]>('http://localhost:8080/demand/list')
       .subscribe({
         next: (dados) => {
-          console.log('Demandas recebidas:', dados);
-          console.log('Quantidade:', dados.length);
-
           this.demands = [...dados];
-
           this.cdr.detectChanges();
-          console.log('Demandas no componente:', this.demands);
         }, error: (err) => {
           console.error('Erro ao carregar demandas:', err);
         },
