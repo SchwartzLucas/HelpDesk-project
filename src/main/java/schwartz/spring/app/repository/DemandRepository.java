@@ -21,13 +21,13 @@ public interface DemandRepository extends JpaRepository<Demand, Long>, JpaSpecif
 
     @Modifying(clearAutomatically = true)
     @Transactional
-    @Query(value = "UPDATE demand d set d.stopped_time = :now where d.public_id = UUID_TO_BIN(:public_id)",
+    @Query(value = "UPDATE demand d set d.stopped_time = :stopped_time where d.public_id = UUID_TO_BIN(:public_id)",
             nativeQuery = true)
-    void updateStoppedTime(@Param("now") Instant now, @Param("public_id") UUID public_id);
+    int updateStoppedTime(@Param("stopped_time") Instant stopped_time, @Param("public_id") String public_id);
 
     @Modifying(clearAutomatically = true)
     @Transactional
-    @Query(value = "UPDATE demand d set d.started_time = :now where d.public_id = UUID_TO_BIN(:public_id)",
+    @Query(value = "UPDATE demand d set d.started_time = :started_time where d.public_id = UUID_TO_BIN(:public_id)",
             nativeQuery = true)
-    void updateStartTime(@Param(":now") Instant now, @Param("public_id") UUID publicId);
+    int updateStartTime(@Param("started_time") Instant started_time, @Param("public_id") String publicId);
 }

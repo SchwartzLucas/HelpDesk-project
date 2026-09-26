@@ -8,10 +8,10 @@ import schwartz.spring.Exceptions.InvalidDemandException;
 import schwartz.spring.Utils.Filter;
 import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
+import schwartz.spring.app.domain.user.User;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DemandRepository;
 import schwartz.spring.app.repository.DynamicQueryBuilder;
-import schwartz.spring.app.domain.user.User;
 import schwartz.spring.app.repository.UserRepository;
 
 import java.time.Instant;
@@ -27,8 +27,7 @@ public class DemandService {
     private final UserRepository userRepository;
     private final DynamicQueryBuilder DB;
 
-    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository,
-                         UserRepository userRepository, DynamicQueryBuilder db) {
+    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, DynamicQueryBuilder db) {
         this.publicIdGenerator = publicIdGenerator;
         this.demandRepository = demandRepository;
         this.userRepository = userRepository;
@@ -57,10 +56,7 @@ public class DemandService {
         demand.setUserDemandId(user_demand_id);
         demand.setUser_name(user_name);
         demandRepository.saveAndFlush(demand);
-        demand.setPublicCode(String.format(
-                        "DEM-%08d", demand.getUserDemandId()
-                )
-        );
+        demand.setPublicCode(String.format("DEM-%08d", demand.getUserDemandId()));
         demandRepository.save(demand);
         return demand;
     }
@@ -134,17 +130,19 @@ public class DemandService {
 
     private void stop(Demand demand) {
         Instant now = Instant.now();
-        demandRepository.updateStoppedTime(now, demand.getPublicId());
-        demand.setStoppedTime(now);
-        demand.setDemandStatus(DemandStatus.STOPPED);
+        if (demandRepository.updateStoppedTime(now, demand.getPublicId().toString()) > 0) {
+            demand.setStoppedTime(now);
+            demand.setDemandStatus(DemandStatus.STOPPED);
+        }
     }
 
     // TODO ver como fazer exceptions
     private void start(Demand demand) {
         Instant now = Instant.now();
-        demandRepository.updateStartTime(now, demand.getPublicId());
-        demand.setStartedTime(now);
-        demand.setDemandStatus(ACTIVE);
+        if (demandRepository.updateStartTime(now, demand.getPublicId().toString()) > 0) {
+            demand.setStartedTime(now);
+            demand.setDemandStatus(ACTIVE);
+        }
     }
 
     public List<Demand> list(DemandListRequest request) {
@@ -167,33 +165,24 @@ public class DemandService {
 
         Specification<Demand> spec = Specification.where((root, query, cb) -> cb.conjunction());
         if (!Utils.isEmpty(request.public_code())) {
-            spec = spec.and(((root, query, cb) ->
-                            cb.like(root.get("public_code"), request.public_code())
-                    )
-            );
+            spec = spec.and(((root, query, cb) -> cb.like(root.get("public_code"), request.public_code())));
         }
 
         if (!Utils.isEmpty(request.title())) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.like(root.get("title"), request.title()))
-            );
+            spec = spec.and(((root, query, cb) -> cb.like(root.get("title"), request.title())));
 
         }
         if (!Utils.isEmpty(request.user())) {
             User user = userRepository.findByLogin(request.user());
             if (!Utils.isEmpty(user)) {
 
-                spec = spec.and(((root, query, cb) ->
-                        cb.equal(root.get("user_id"), user.getPublicId()))
-                );
+                spec = spec.and(((root, query, cb) -> cb.equal(root.get("user_id"), user.getPublicId())));
             }
 
         }
 
         if (!Utils.isEmpty(request.status())) {
-            spec = spec.and(((root, query, cb) ->
-                    cb.equal(root.get("demand_status"), request.status()))
-            );
+            spec = spec.and(((root, query, cb) -> cb.equal(root.get("demand_status"), request.status())));
 
         }
 

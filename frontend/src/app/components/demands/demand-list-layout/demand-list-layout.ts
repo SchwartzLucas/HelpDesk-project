@@ -15,10 +15,10 @@ export interface Demand {
   stopped_time: string | null;
   title: string;
   user_name: string | null;
-  time_wasted: string;
   user_id?: string;
   user_demand_id?: number;
-  demand_status_code?: number;
+  status?: number;
+  time_wasted: string;
 }
 
 @Component({

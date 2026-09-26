@@ -40,7 +40,7 @@
             <td>{{ d.public_code }}</td>
             <td>{{ d.title }}</td>
             <td>{{ d.user_name ?? 'Nenhum usuário atribuído' }}</td>
-            <td>{{ d.demand_status_code ?? '-' }}</td>
+            <td>{{ d.status ?? '-' }}</td>
             <td>{{ d.create_time | date: 'dd/MM/yyyy HH:mm' }}</td>
             <td>{{ calcularTempoGasto(d) }}</td>
           </tr>

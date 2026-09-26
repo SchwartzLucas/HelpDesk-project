@@ -1,9 +1,9 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {HttpClient} from '@angular/common/http';
-import {FormsModule} from '@angular/forms';
-import {UserService} from '../../../services/users/user-service';
-import {DEMAND_STATUS} from '../../../constants/demand-status';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { UserService } from '../../../services/users/user-service';
+import { DEMAND_STATUS } from '../../../constants/demand-status';
 
 export interface Demand {
   public_id: string;
@@ -17,8 +17,8 @@ export interface Demand {
 }
 
 export interface Status {
-  name: string,
-  value: number
+  name: string;
+  value: number;
 }
 
 export interface User {
@@ -27,50 +27,40 @@ export interface User {
 }
 
 @Component({
-  imports: [
-    FormsModule
-  ],
+  imports: [FormsModule],
   selector: 'app-demand-edit-layout',
   styleUrl: './demand-edit-layout.scss',
   templateUrl: './demand-edit-layout.html',
 })
 export class DemandEditLayout implements OnInit {
 
-  constructor(
-    private userService: UserService
-  ) {
-  }
+  constructor(private userService: UserService) {}
 
+  private router = inject(Router);
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
 
   statuses: Status[] = DEMAND_STATUS;
 
-  demand: Demand | null = null;
-  users: User[] = [];
-
-  carregandoUsuarios = false;
-
-  carregandoStatus = false;
-
+  demand = signal<Demand | null>(null);
+  users = signal<User[]>([]);
+  carregandoUsuarios = signal(false);
+  carregandoStatus = signal(false);
+  statusDisponiveis = signal<Status[]>([]);
+  publicId: string | null = null;
   ngOnInit(): void {
-    const publicId = this.route.snapshot.paramMap.get('publicId');
+    this.publicId = this.route.snapshot.paramMap.get('publicId');
 
-    console.log('1 - PUBLIC ID:', publicId);
-
-    if (!publicId) {
+    if (!this.publicId) {
       return;
     }
 
     this.http
-      .get<Demand>(`http://localhost:8080/demand/${publicId}`)
+      .get<Demand>(`http://localhost:8080/demand/${this.publicId}`)
       .subscribe({
         next: (demanda) => {
-          console.log('2 - RESPOSTA API:', demanda);
-
-          this.demand = demanda;
-
-          console.log('3 - DEMAND:', this.demand);
+          this.demand.set(demanda);
+          this.carregarDemandStatus();
         },
         error: (err) => {
           console.error('ERRO API:', err);
@@ -79,37 +69,65 @@ export class DemandEditLayout implements OnInit {
   }
 
   carregarUsuarios(): void {
-    this.carregandoUsuarios = true;
+    this.carregandoUsuarios.set(true);
 
     this.userService.carregarUsuarios().subscribe({
       next: (dados) => {
-        this.users = dados;
-        this.carregandoUsuarios = false;
+        this.users.set(dados);
+        this.carregandoUsuarios.set(false);
       },
       error: (err) => {
         console.error('Erro ao carregar usuários:', err);
-        this.carregandoUsuarios = false;
+        this.carregandoUsuarios.set(false);
       }
     });
   }
 
-  statusDisponiveis: Status[] = [];
-
   carregarDemandStatus(): void {
-    this.carregandoStatus = true;
+    this.carregandoStatus.set(true);
 
-    if (!this.demand?.status) {
-      this.statusDisponiveis = this.statuses;
+    const atual = this.demand()?.status;
+
+    if (!atual) {
+      this.statusDisponiveis.set(this.statuses);
     } else {
-      const statusAtual = Number(this.demand.status);
-
-      this.statusDisponiveis = this.statuses.filter(
-        status => status.value !== statusAtual
+      const statusAtual = Number(atual);
+      this.statusDisponiveis.set(
+        this.statuses.filter(status => status.value !== statusAtual)
       );
     }
 
-    this.carregandoStatus = false;
+    this.carregandoStatus.set(false);
   }
 
 
+  fecharJanelaEditar(): void {
+    this.router.navigate(['/demands']);
+  }
+
+  salvarDemanda(): void {
+    const atual = this.demand();
+
+    if (!atual || !this.publicId) {
+      return;
+    }
+
+    const editedValues = {
+      title: atual.title,
+      description: atual.description,
+      status: atual.status,
+      user_id: atual.user_id
+    };
+
+    this.http
+      .post(`http://localhost:8080/demand/update/${this.publicId}`, editedValues)
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/demands']);
+        },
+        error: (err) => {
+          console.error('Erro ao salvar demanda:', err);
+        }
+      });
+  }
 }

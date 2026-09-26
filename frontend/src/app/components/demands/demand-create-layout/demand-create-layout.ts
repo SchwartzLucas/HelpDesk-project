@@ -27,7 +27,6 @@ export class DemandCreateLayout {
   }
   private http = inject(HttpClient);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef)
   users: User[] = [];
   carregandoUsuarios = false;
   usuariosCarregados = false;

@@ -1,38 +1,97 @@
-@if (demand) {
-  <input [(ngModel)]="demand.title">
-
-  <textarea [(ngModel)]="demand.description"></textarea>
-
-  <select
-    id="demand_status"
-    [(ngModel)]="demand.status">
-
-    @for (status of statusDisponiveis; track status.value) {
-      <option [ngValue]="status.value">
-        {{ status.name }}
-      </option>
-    }
-  </select>
-
-  <select
-    id="user"
-    [(ngModel)]="demand.user_id"
-    (click)="carregarUsuarios()">
-
-    <option [ngValue]="null">
-      Nenhum usuário atribuído
-    </option>
-
-    @if (carregandoUsuarios) {
-      <option disabled>
-        Carregando usuários...
-      </option>
-    }
-
-    @for (user of users; track user.user_id) {
-      <option [ngValue]="user.user_id">
-        {{ user.user_name }}
-      </option>
-    }
-  </select>
-}
+<main>
+  @if (demand(); as demand) {
+    <div class="modal-overlay" (click)="fecharJanelaEditar()">
+      <div class="modal-window" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Editar demanda</h2>
+          <button
+            type="button"
+            class="btn-fechar"
+            (click)="fecharJanelaEditar()">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="title">
+              Título
+            </label>
+            <input
+              id="title"
+              type="text"
+              [(ngModel)]="demand.title"
+              placeholder="Digite o título da demanda">
+          </div>
+          <div class="form-group">
+            <label for="description">
+              Descrição
+            </label>
+            <textarea
+              id="description"
+              [(ngModel)]="demand.description"
+              placeholder="Descreva a demanda">
+          </textarea>
+          </div>
+          <div class="form-group">
+            <label for="demand_status">
+              Status
+            </label>
+            <select
+              id="demand_status"
+              [(ngModel)]="demand.status"
+              (click)="carregarDemandStatus()">
+              @if (carregandoStatus()) {
+                <option disabled>
+                  Carregando status...
+                </option>
+              }
+              @for (status of statusDisponiveis(); track status.value) {
+                <option [ngValue]="status.value">
+                  {{ status.name }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="user">
+              Usuário responsável
+            </label>
+            <select
+              id="user"
+              [(ngModel)]="demand.user_id"
+              (click)="carregarUsuarios()">
+              <option [ngValue]="null">
+                Nenhum usuário atribuído
+              </option>
+              @if (carregandoUsuarios()) {
+                <option disabled>
+                  Carregando usuários...
+                </option>
+              }
+              @for (user of users(); track user.user_id) {
+                <option [ngValue]="user.user_id">
+                  {{ user.user_name }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn-cancelar"
+            (click)="fecharJanelaEditar()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn-criar"
+            [disabled]="!demand.title.trim()"
+            (click)="salvarDemanda()">
+            Salvar alterações
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</main>
