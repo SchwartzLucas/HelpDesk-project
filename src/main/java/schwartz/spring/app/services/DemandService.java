@@ -11,10 +11,7 @@ import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.domain.user.User;
 import schwartz.spring.app.infra.PublicIdGenerator;
-import schwartz.spring.app.repository.DemandRepository;
-import schwartz.spring.app.repository.DemandStatusHistoryRepository;
-import schwartz.spring.app.repository.DynamicQueryBuilder;
-import schwartz.spring.app.repository.UserRepository;
+import schwartz.spring.app.repository.*;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,14 +27,16 @@ public class DemandService {
     private final UserRepository userRepository;
     private final DynamicQueryBuilder DB;
     private final DemandStatusHistoryRepository historyRepository;
+    private final DemandWorkIntervalRepository intervalRepository;
     private final UserService userService;
 
-    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, DynamicQueryBuilder db, DemandStatusHistoryRepository historyRepository, UserService userService, UserService userService1) {
+    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, DynamicQueryBuilder db, DemandStatusHistoryRepository historyRepository, UserService userService, DemandWorkIntervalRepository intervalRepository, UserService userService1) {
         this.publicIdGenerator = publicIdGenerator;
         this.demandRepository = demandRepository;
         this.userRepository = userRepository;
         this.DB = db;
         this.historyRepository = historyRepository;
+        this.intervalRepository = intervalRepository;
         this.userService = userService1;
     }
 
@@ -100,21 +99,21 @@ public class DemandService {
                 case STOPPED -> { // stopped demand
                     switch (request.status()) {
                         case FINISHED -> finish(now, demand);
+                        case ACTIVE -> startNewInterval(now, demand);
+                        case CANCELED -> stopWorkInterval(now, demand);
                         case REOPENED, CREATED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
                     demand.setDemandStatus(request.status());
-                    if (ACTIVE_OR_CANCELED) {
-                        stop(now, demand);
-                        demand.setDemandStatus(request.status());
-                    }
-                    // TODO EXCEPTION: stopped demand can only be updated to active or finished
                 }
                 case FINISHED -> { // finished demand
-                    if (request.status().equals(CANCELED) || request.status().equals(ACTIVE)) {
-                        demand.setDemandStatus(request.status());
+                    switch (request.status()) {
+                        case REOPENED -> demand.setDemandStatus(request.status());
+                        case ACTIVE, CREATED, STOPPED, CANCELED ->
+                                throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
+
                     }
-                    // TODO EXCEPTION: finished demand can only be updated to canceled or active
+                    changeStatus(demand, request.status(), now);
                 }
                 case CANCELED -> { // canceled demand
                     if (request.status().equals(REOPENED)) {
@@ -143,42 +142,54 @@ public class DemandService {
                 demand.setUserId(request.user());
             }
         }
-        demandRepository.saveAndFlush(demand);
+        demandRepository.save(demand);
+        changeStatus(demand, request.status(), now);
         return demand;
     }
 
-    private void stop(Instant now, Demand demand) {
-        if (demandRepository.updateStoppedTime(now, demand.getPublicId().toString()) > 0) {
-            demand.setStoppedTime(now);
-            demand.setDemandStatus(STOPPED);
-            Duration time = Duration.between(demand.getStartedTime(), demand.getStoppedTime());
-            long hours = time.toHours();
-            long minutes = time.toMinutesPart();
-            String timeSpent = String.format("%02dh : %02dm", hours, minutes);
-            demand.setTimeSpent(timeSpent);
-            changeStatus(demand, STOPPED, now);
-        }
-    }
-
-    // TODO ver como fazer exceptions
     private void start(Instant now, Demand demand) {
         if (demandRepository.updateStartTime(now, demand.getPublicId().toString()) > 0) {
             demand.setStartedTime(now);
-            demand.setDemandStatus(ACTIVE);
-            changeStatus(demand, ACTIVE, now);
+            DemandWorkInterval interval = new DemandWorkInterval();
+            interval.setDemand(demand);
+            interval.setStartedAt(now);
+            intervalRepository.save(interval);
+        }
+    }
+
+    private void stop(Instant now, Demand demand) {
+        DemandWorkInterval interval = intervalRepository.findFirstByDemand_IdAndEndedAtIsNull(demand.getId()).orElse(null);
+        if (interval != null && demandRepository.updateStoppedTime(now, demand.getPublicId().toString()) > 0) {
+            demand.setStoppedTime(now);
+            interval.setEndedAt(now);
+            intervalRepository.save(interval);
+            Duration time = Duration.between(interval.getStartedAt(), interval.getEndedAt());
         }
     }
 
     private void finish(Instant now, Demand demand) {
         if (demandRepository.updateFinishedTime(now, demand.getPublicId().toString()) > 0) {
             demand.setFinishTime(now);
-            demand.setDemandStatus(FINISHED);
             Duration time = Duration.between(demand.getStartedTime(), demand.getFinishTime());
             long hours = time.toHours();
             long minutes = time.toMinutesPart();
             String timeSpent = String.format("%02dh : %02dm", hours, minutes);
             demand.setTimeSpent(timeSpent);
-            changeStatus(demand, FINISHED, now);
+        }
+    }
+
+    private void startNewInterval(Instant now, Demand demand) {
+        DemandWorkInterval interval = new DemandWorkInterval();
+        interval.setDemand(demand);
+        interval.setStartedAt(now);
+        intervalRepository.save(interval);
+    }
+
+    private void stopWorkInterval(Instant now, Demand demand){
+        DemandWorkInterval interval = intervalRepository.findFirstByDemand_IdAndEndedAtIsNull(demand.getId()).orElse(null);
+        if(interval != null){
+            interval.setEndedAt(now);
+            intervalRepository.save(interval);
         }
     }
 
@@ -263,14 +274,9 @@ public class DemandService {
     }
 
 
-
     // TODO MELHORAR -> fazer adicionar ao time_spent -> realizar cálculo por tempos...
     @Transactional
-    public void changeStatus(
-            Demand demand,
-            DemandStatus newStatus,
-            Instant now
-    ) {
+    public void changeStatus(Demand demand, DemandStatus newStatus, Instant now) {
         User request_user = userService.getAuthenticatedUser();
         DemandStatus previousStatus = demand.getDemandStatus();
         if (previousStatus == newStatus) {
