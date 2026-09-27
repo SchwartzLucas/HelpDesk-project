@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import schwartz.spring.Exceptions.IllegalStatusException;
 import schwartz.spring.Exceptions.InvalidDemandException;
 import schwartz.spring.Utils.Utils;
 import schwartz.spring.app.domain.demand.*;
@@ -31,7 +32,7 @@ public class DemandController {
 
     @PostMapping("/update/{demand_public_id}")
     public ResponseEntity<DemandUpdateResponse> update(@PathVariable UUID demand_public_id,
-                                                       @RequestBody(required = false) DemandUpdateRequest request) {
+                                                       @RequestBody(required = false) DemandUpdateRequest request) throws IllegalStatusException {
         if (Utils.isEmpty(demand_public_id) || Utils.isEmpty(request)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(null);

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import schwartz.spring.Exceptions.IllegalStatusException;
 import schwartz.spring.Exceptions.InvalidDemandException;
 import schwartz.spring.Utils.Filter;
 import schwartz.spring.Utils.Utils;
@@ -11,9 +12,11 @@ import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.domain.user.User;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.DemandRepository;
+import schwartz.spring.app.repository.DemandStatusHistoryRepository;
 import schwartz.spring.app.repository.DynamicQueryBuilder;
 import schwartz.spring.app.repository.UserRepository;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -26,12 +29,16 @@ public class DemandService {
     private final DemandRepository demandRepository;
     private final UserRepository userRepository;
     private final DynamicQueryBuilder DB;
+    private final DemandStatusHistoryRepository historyRepository;
+    private final UserService userService;
 
-    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, DynamicQueryBuilder db) {
+    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, DynamicQueryBuilder db, DemandStatusHistoryRepository historyRepository, UserService userService, UserService userService1) {
         this.publicIdGenerator = publicIdGenerator;
         this.demandRepository = demandRepository;
         this.userRepository = userRepository;
-        DB = db;
+        this.DB = db;
+        this.historyRepository = historyRepository;
+        this.userService = userService1;
     }
 
     @Transactional
@@ -64,8 +71,9 @@ public class DemandService {
 
     @Transactional
     @Modifying(clearAutomatically = true)
-    public Demand update(UUID demandPublicId, DemandUpdateRequest request) {
+    public Demand update(UUID demandPublicId, DemandUpdateRequest request) throws IllegalStatusException {
         Demand demand = demandRepository.findByPublicId(demandPublicId);
+        Instant now = Instant.now();
         if (Utils.isEmpty(demand)) {
             return null;
         }
@@ -73,20 +81,31 @@ public class DemandService {
             final boolean ACTIVE_OR_CANCELED = request.status().equals(ACTIVE) || request.status().equals(CANCELED);
             switch (demand.getDemandStatus()) {
                 case CREATED -> { // created demand
-                    if (ACTIVE_OR_CANCELED) {
-                        demand.setDemandStatus(request.status());
+                    switch (request.status()) {
+                        case ACTIVE -> start(now, demand);
+                        case FINISHED, REOPENED, STOPPED ->
+                                throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    // TODO EXCEPTION: created demand can only be updated to active or canceled
+                    demand.setDemandStatus(request.status());
                 }
                 case ACTIVE -> { // actual active demand
-                    if (request.status().equals(STOPPED) || request.status().equals(FINISHED)) {
-                        start(demand);
+                    switch (request.status()) {
+                        case STOPPED -> stop(now, demand);
+                        case FINISHED -> finish(now, demand);
+                        case REOPENED, CREATED ->
+                                throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    // TODO EXCEPTION: active demand can only be updated to stopped or finished
+                    demand.setDemandStatus(request.status());
                 }
                 case STOPPED -> { // stopped demand
-                    if (request.status().equals(CREATED) || request.status().equals(FINISHED)) {
-                        stop(demand);
+                    switch (request.status()) {
+                        case FINISHED -> finish(now, demand);
+                        case REOPENED, CREATED ->
+                                throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
+                    }
+                    demand.setDemandStatus(request.status());
+                    if (ACTIVE_OR_CANCELED) {
+                        stop(now, demand);
                         demand.setDemandStatus(request.status());
                     }
                     // TODO EXCEPTION: stopped demand can only be updated to active or finished
@@ -128,26 +147,44 @@ public class DemandService {
         return demand;
     }
 
-    private void stop(Demand demand) {
-        Instant now = Instant.now();
+    private void stop(Instant now, Demand demand) {
         if (demandRepository.updateStoppedTime(now, demand.getPublicId().toString()) > 0) {
             demand.setStoppedTime(now);
-            demand.setDemandStatus(DemandStatus.STOPPED);
+            demand.setDemandStatus(STOPPED);
+            Duration time = Duration.between(demand.getStartedTime(), demand.getStoppedTime());
+            long hours = time.toHours();
+            long minutes = time.toMinutesPart();
+            String timeSpent = String.format("%02dh : %02dm", hours, minutes);
+            demand.setTimeSpent(timeSpent);
+            changeStatus(demand, STOPPED, now);
         }
     }
 
     // TODO ver como fazer exceptions
-    private void start(Demand demand) {
-        Instant now = Instant.now();
+    private void start(Instant now, Demand demand) {
         if (demandRepository.updateStartTime(now, demand.getPublicId().toString()) > 0) {
             demand.setStartedTime(now);
             demand.setDemandStatus(ACTIVE);
+            changeStatus(demand, ACTIVE, now);
+        }
+    }
+
+    private void finish(Instant now, Demand demand) {
+        if (demandRepository.updateFinishedTime(now, demand.getPublicId().toString()) > 0) {
+            demand.setFinishTime(now);
+            demand.setDemandStatus(FINISHED);
+            Duration time = Duration.between(demand.getStartedTime(), demand.getFinishTime());
+            long hours = time.toHours();
+            long minutes = time.toMinutesPart();
+            String timeSpent = String.format("%02dh : %02dm", hours, minutes);
+            demand.setTimeSpent(timeSpent);
+            changeStatus(demand, FINISHED, now);
         }
     }
 
     public List<Demand> list(DemandListRequest request) {
+        List<Demand> demands = demandRepository.findAll();
         if (Utils.isEmpty(request)) {
-            List<Demand> demands = demandRepository.findAll();
             for (Demand demand : demands) {
                 if (Utils.isEmpty(demand.getUserId())) {
                     continue;
@@ -216,6 +253,35 @@ public class DemandService {
         if (Utils.isEmpty(demand)) {
             throw new InvalidDemandException("Demand not exists anymore");
         }
+        if (!Utils.isEmpty(demand.getUserId())) {
+            User user = userRepository.findByPublicId(demand.getUserId());
+            if (!Utils.isEmpty(user)) {
+                demand.setUser_name(user.getLogin());
+            }
+        }
         return demand;
+    }
+
+
+
+    // TODO MELHORAR -> fazer adicionar ao time_spent -> realizar cálculo por tempos...
+    @Transactional
+    public void changeStatus(
+            Demand demand,
+            DemandStatus newStatus,
+            Instant now
+    ) {
+        User request_user = userService.getAuthenticatedUser();
+        DemandStatus previousStatus = demand.getDemandStatus();
+        if (previousStatus == newStatus) {
+            return;
+        }
+        DemandStatusHistory history = new DemandStatusHistory();
+        history.setDemand(demand);
+        history.setPreviousStatus(previousStatus);
+        history.setNewStatus(newStatus);
+        history.setChangedAt(now);
+        history.setChangedBy(request_user.getPublicId());
+        historyRepository.save(history);
     }
 }

@@ -30,4 +30,12 @@ public interface DemandRepository extends JpaRepository<Demand, Long>, JpaSpecif
     @Query(value = "UPDATE demand d set d.started_time = :started_time where d.public_id = UUID_TO_BIN(:public_id)",
             nativeQuery = true)
     int updateStartTime(@Param("started_time") Instant started_time, @Param("public_id") String publicId);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "UPDATE demand d set d.finish_time = :finish_time where d.public_id = UUID_TO_BIN(:public_id)",
+            nativeQuery = true)
+    int updateFinishedTime(@Param("finish_time") Instant finish_time, @Param("public_id") String publicId);
+
+
 }

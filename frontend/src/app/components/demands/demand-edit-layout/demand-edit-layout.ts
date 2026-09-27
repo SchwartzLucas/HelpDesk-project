@@ -119,6 +119,8 @@ export class DemandEditLayout implements OnInit {
       user_id: atual.user_id
     };
 
+    console.log("VALORES EDITADOR:", editedValues);
+
     this.http
       .post(`http://localhost:8080/demand/update/${this.publicId}`, editedValues)
       .subscribe({

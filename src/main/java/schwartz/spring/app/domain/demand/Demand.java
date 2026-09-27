@@ -74,6 +74,10 @@ public class Demand {
     @ToString.Exclude
     @Column(name = "started_time")
     private Instant startedTime;
+    @Size(max = 20)
+    @ToString.Exclude
+    @Column(name = "time_spent", length = 20)
+    private String timeSpent;
     @Transient
     private String user_name;
 

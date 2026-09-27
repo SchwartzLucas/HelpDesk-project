@@ -18,7 +18,7 @@ export interface Demand {
   user_id?: string;
   user_demand_id?: number;
   status?: number;
-  time_wasted: string;
+  time_spent: string;
 }
 
 @Component({
@@ -48,38 +48,6 @@ export class DemandListLayoutComponent {
           console.error('Erro ao carregar demandas:', err);
         },
       });
-  }
-
-  calcularTempoGasto(d: Demand): string {
-    const started = d.started_time;
-    const ended = d.finish_time ?? d.stopped_time;
-
-    if (!started) {
-      return '-';
-    }
-
-    const start = new Date(started);
-    const end = ended ? new Date(ended) : new Date();
-
-    const diffMs = end.getTime() - start.getTime();
-
-    if (diffMs < 0) {
-      return '-';
-    }
-
-    const totalSeconds = Math.floor(diffMs / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    const parts: string[] = [];
-
-    if (hours > 0) parts.push(`${hours}h`);
-    if (minutes > 0 || hours > 0) parts.push(`${minutes}m`);
-
-    parts.push(`${seconds}s`);
-
-    return parts.join(' ');
   }
 
   abrirJanelaCriar(): void {

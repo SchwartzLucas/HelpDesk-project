@@ -14,7 +14,8 @@ public record DemandListResponse(
         Instant started_time,
         Instant stopped_time,
         Instant finish_time,
-        String status
+        String status,
+        String time_spent
         ) {
     public static List<DemandListResponse> from(List<Demand> demand){
         return demand.stream().map(d -> new DemandListResponse (
@@ -27,7 +28,8 @@ public record DemandListResponse(
                 d.getStartedTime(),
                 d.getStoppedTime(),
                 d.getFinishTime(),
-                d.getDemandStatus().name()
+                d.getDemandStatus().name(),
+                d.getTimeSpent()
         )).toList();
     }
 }

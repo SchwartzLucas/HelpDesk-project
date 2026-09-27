@@ -24,7 +24,10 @@
         <th>Título</th>
         <th>Usuário</th>
         <th>Status</th>
-        <th>Criado</th>
+        <th>Criado em</th>
+        <th>Data de início</th>
+        <th>Último tempo parado</th>
+        <th>Finalizado em</th>
         <th>Tempo gasto</th>
       </tr>
       </thead>
@@ -42,7 +45,10 @@
             <td>{{ d.user_name ?? 'Nenhum usuário atribuído' }}</td>
             <td>{{ d.status ?? '-' }}</td>
             <td>{{ d.create_time | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ calcularTempoGasto(d) }}</td>
+            <td>{{ d.started_time | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ d.stopped_time | date: 'dd/MM/yyyy HH:mm'}}</td>
+            <td>{{ d.finish_time | date: 'dd/MM/yyyy HH:mm'}}</td>
+            <td>{{ d.time_spent }}</td>
           </tr>
 
         }
