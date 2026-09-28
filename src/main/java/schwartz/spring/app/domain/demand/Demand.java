@@ -28,9 +28,6 @@ public class Demand {
     @ColumnDefault("(UUID_TO_BIN(UUID()))")
     @Column(name = "user_id")
     private UUID userId;
-    @ToString.Exclude
-    @Column(name = "user_demand_id")
-    private Long userDemandId;
     @Size(max = 30)
     @ToString.Exclude
     @Column(name = "public_code", length = 30)

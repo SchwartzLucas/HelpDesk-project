@@ -12,8 +12,6 @@ import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.domain.user.User;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.*;
-
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -30,40 +28,40 @@ public class DemandService {
     private final DemandWorkIntervalRepository intervalRepository;
     private final UserService userService;
 
-    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository, UserRepository userRepository, DynamicQueryBuilder db, DemandStatusHistoryRepository historyRepository, UserService userService, DemandWorkIntervalRepository intervalRepository, UserService userService1) {
+    public DemandService(PublicIdGenerator publicIdGenerator, DemandRepository demandRepository,
+                         UserRepository userRepository, DynamicQueryBuilder db, DemandStatusHistoryRepository historyRepository,
+                         UserService userService, DemandWorkIntervalRepository intervalRepository) {
         this.publicIdGenerator = publicIdGenerator;
         this.demandRepository = demandRepository;
         this.userRepository = userRepository;
         this.DB = db;
         this.historyRepository = historyRepository;
         this.intervalRepository = intervalRepository;
-        this.userService = userService1;
+        this.userService = userService;
     }
 
     @Transactional
     public Demand create(DemandCreateRequest request) {
         UUID user_public_id = null;
-        Long user_demand_id = null;
         String user_name = null;
         if (!Utils.isEmpty(request.user_id())) {
             User user = userRepository.findByPublicId(request.user_id());
             user_public_id = user.getPublicId();
             user_name = user.getLogin();
-            user_demand_id = demandRepository.findMaxUserDemandID(user.getPublicId()) + 1;
         }
         Instant now = Instant.now();
         Demand demand = new Demand();
         demand.setPublicId(publicIdGenerator.generate());
         demand.setTitle(request.title());
         demand.setDescription(request.description());
-        demand.setDemandStatus(DemandStatus.CREATED);
+        demand.setDemandStatus(CREATED);
         demand.setCreateTime(now);
         demand.setUserId(user_public_id);
-        demand.setUserDemandId(user_demand_id);
         demand.setUser_name(user_name);
         demandRepository.saveAndFlush(demand);
-        demand.setPublicCode(String.format("DEM-%08d", demand.getUserDemandId()));
+        demand.setPublicCode(String.format("DEM-%d", demand.getId()));
         demandRepository.save(demand);
+        changeStatus(demand, CREATED, now);
         return demand;
     }
 
@@ -77,7 +75,6 @@ public class DemandService {
             return null;
         }
         if (!Utils.isEmpty(request.status())) {
-            final boolean ACTIVE_OR_CANCELED = request.status().equals(ACTIVE) || request.status().equals(CANCELED);
             switch (demand.getDemandStatus()) {
                 case CREATED -> { // created demand
                     switch (request.status()) {
@@ -106,27 +103,20 @@ public class DemandService {
                     }
                     demand.setDemandStatus(request.status());
                 }
-                case FINISHED -> { // finished demand
+                case FINISHED, CANCELED -> { // finished demand
                     switch (request.status()) {
-                        case REOPENED -> demand.setDemandStatus(request.status());
-                        case ACTIVE, CREATED, STOPPED, CANCELED ->
+                        case ACTIVE, CREATED, STOPPED, CANCELED, FINISHED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
 
                     }
-                    changeStatus(demand, request.status(), now);
-                }
-                case CANCELED -> { // canceled demand
-                    if (request.status().equals(REOPENED)) {
-                        demand.setDemandStatus(request.status());
-                    }
-                    // TODO EXCEPTION: canceled demand can only be updated to reopened
                 }
                 case REOPENED -> { // reopened demand}
-                    if (ACTIVE_OR_CANCELED) {
-                        demand.setDemandStatus(request.status());
+                    switch (request.status()) {
+                        case ACTIVE -> startNewInterval(now, demand);
+                        case STOPPED, CREATED, FINISHED ->
+                                throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    // TODO EXCEPTION: reopened demand can only be updated to active or canceled
-
+                    demand.setDemandStatus(request.status());
                 }
             }
         }
@@ -163,18 +153,15 @@ public class DemandService {
             demand.setStoppedTime(now);
             interval.setEndedAt(now);
             intervalRepository.save(interval);
-            Duration time = Duration.between(interval.getStartedAt(), interval.getEndedAt());
         }
     }
 
     private void finish(Instant now, Demand demand) {
-        if (demandRepository.updateFinishedTime(now, demand.getPublicId().toString()) > 0) {
+        DemandWorkInterval interval = intervalRepository.findFirstByDemand_IdAndEndedAtIsNull(demand.getId()).orElse(null);
+        if (interval != null && demandRepository.updateFinishedTime(now, demand.getPublicId().toString()) > 0) {
             demand.setFinishTime(now);
-            Duration time = Duration.between(demand.getStartedTime(), demand.getFinishTime());
-            long hours = time.toHours();
-            long minutes = time.toMinutesPart();
-            String timeSpent = String.format("%02dh : %02dm", hours, minutes);
-            demand.setTimeSpent(timeSpent);
+            interval.setEndedAt(now);
+            intervalRepository.save(interval);
         }
     }
 
@@ -185,9 +172,9 @@ public class DemandService {
         intervalRepository.save(interval);
     }
 
-    private void stopWorkInterval(Instant now, Demand demand){
+    private void stopWorkInterval(Instant now, Demand demand) {
         DemandWorkInterval interval = intervalRepository.findFirstByDemand_IdAndEndedAtIsNull(demand.getId()).orElse(null);
-        if(interval != null){
+        if (interval != null) {
             interval.setEndedAt(now);
             intervalRepository.save(interval);
         }
@@ -284,7 +271,9 @@ public class DemandService {
         }
         DemandStatusHistory history = new DemandStatusHistory();
         history.setDemand(demand);
-        history.setPreviousStatus(previousStatus);
+        if (!Utils.isEmpty(historyRepository.findByDemand_IdOrderByChangedAtAsc(demand.getId()))) {
+            history.setPreviousStatus(previousStatus);
+        }
         history.setNewStatus(newStatus);
         history.setChangedAt(now);
         history.setChangedBy(request_user.getPublicId());
