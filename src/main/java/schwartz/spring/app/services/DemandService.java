@@ -1,5 +1,6 @@
 package schwartz.spring.app.services;
 
+import jakarta.validation.constraints.Size;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ import schwartz.spring.app.domain.demand.*;
 import schwartz.spring.app.domain.user.User;
 import schwartz.spring.app.infra.PublicIdGenerator;
 import schwartz.spring.app.repository.*;
+
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -82,16 +85,15 @@ public class DemandService {
                         case FINISHED, REOPENED, STOPPED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    demand.setDemandStatus(request.status());
                 }
                 case ACTIVE -> { // actual active demand
                     switch (request.status()) {
                         case STOPPED -> stop(now, demand);
                         case FINISHED -> finish(now, demand);
+                        case CANCELED -> stopWorkInterval(now, demand);
                         case REOPENED, CREATED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    demand.setDemandStatus(request.status());
                 }
                 case STOPPED -> { // stopped demand
                     switch (request.status()) {
@@ -101,24 +103,24 @@ public class DemandService {
                         case REOPENED, CREATED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    demand.setDemandStatus(request.status());
                 }
                 case FINISHED, CANCELED -> { // finished demand
                     switch (request.status()) {
-                        case ACTIVE, CREATED, STOPPED, CANCELED, FINISHED ->
+                        case ACTIVE, CREATED, STOPPED, CANCELED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
 
                     }
                 }
-                case REOPENED -> { // reopened demand}
+                case REOPENED -> { // reopened demand
                     switch (request.status()) {
                         case ACTIVE -> startNewInterval(now, demand);
                         case STOPPED, CREATED, FINISHED ->
                                 throw new IllegalStatusException("Status cannot be " + request.status() + "when demand status" + "are: " + demand.getDemandStatus().name());
                     }
-                    demand.setDemandStatus(request.status());
                 }
             }
+            changeStatus(demand, request.status(), now);
+            demand.setDemandStatus(request.status());
         }
         if (!Utils.isEmpty(request.title())) {
             demand.setTitle(request.title());
@@ -132,9 +134,25 @@ public class DemandService {
                 demand.setUserId(request.user());
             }
         }
+        demand.setTimeSpent(getTimeSpentOnDemand(demand));
         demandRepository.save(demand);
-        changeStatus(demand, request.status(), now);
         return demand;
+    }
+
+    private @Size(max = 20) String getTimeSpentOnDemand(Demand demand) {
+        List<DemandWorkInterval> intervals = intervalRepository.findByDemand_IdOrderByStartedAtAsc(demand.getId());
+        String time_spent = "";
+        for (DemandWorkInterval interval : intervals) {
+            if (!Utils.isEmpty(interval.getStartedAt()) && !Utils.isEmpty(interval.getEndedAt())) {
+                Duration time = Duration.between(interval.getStartedAt(), interval.getEndedAt());
+                long days = time.toDays();
+                long hours = time.toHours();
+                long minutes = time.toMinutes();
+                time_spent = days < 1 ? String.format("%02dh : %02dm", hours, minutes) :
+                        String.format("%02dD : %02dh : %02dm", days, hours, minutes);
+            }
+        }
+        return time_spent;
     }
 
     private void start(Instant now, Demand demand) {
